@@ -224,7 +224,7 @@ npm run dev
 
 Servicios locales:
 
-- App: `http://localhost:3000`
+- App: `http://localhost:3001` (Empresites usa el 3000)
 - PostgreSQL: `localhost:5433` (se usa 5433 para no chocar con otros proyectos)
 - Correo de desarrollo: Mailpit en `http://localhost:8025`
 
