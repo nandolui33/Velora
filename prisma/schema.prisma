@@ -1,0 +1,587 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+enum BusinessStatus {
+  active
+  suspended
+  disabled
+}
+
+enum MembershipRole {
+  owner
+  professional
+}
+
+enum MembershipStatus {
+  active
+  invited
+  disabled
+}
+
+enum AppointmentStatus {
+  confirmed
+  completed
+  cancelled
+  no_show
+}
+
+enum AppointmentSource {
+  online
+  admin
+  phone
+  walk_in
+}
+
+enum PaymentStatus {
+  unpaid
+  partial
+  paid
+  waived
+}
+
+enum PlanInterval {
+  month
+  year
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  suspended
+  cancelled
+}
+
+model User {
+  id                String     @id @default(uuid()) @db.Uuid
+  name              String?
+  email             String     @unique
+  emailVerified     DateTime? @db.Timestamptz(3)  @map("email_verified")
+  image             String?
+  phone             String?
+  isSuperadmin      Boolean    @default(false) @map("is_superadmin")
+  status            UserStatus @default(active)
+  termsAcceptedAt   DateTime? @db.Timestamptz(3)  @map("terms_accepted_at")
+  termsVersion      String?    @map("terms_version")
+  privacyAcceptedAt DateTime? @db.Timestamptz(3)  @map("privacy_accepted_at")
+  privacyVersion    String?    @map("privacy_version")
+  lastLoginAt       DateTime? @db.Timestamptz(3)  @map("last_login_at")
+  createdAt         DateTime @db.Timestamptz(3)   @default(now()) @map("created_at")
+  updatedAt         DateTime @db.Timestamptz(3)   @updatedAt @map("updated_at")
+  deletedAt         DateTime? @db.Timestamptz(3)  @map("deleted_at")
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships Membership[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
+  createdAt         DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime @db.Timestamptz(3)
+  createdAt    DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  lastUsedAt   DateTime @db.Timestamptz(3) @default(now()) @map("last_used_at")
+  ipHash       String?  @map("ip_hash")
+  userAgent    String?  @map("user_agent")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expires])
+  @@index([expires])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime @db.Timestamptz(3)
+
+  @@id([identifier, token])
+  @@index([expires])
+  @@map("verification_tokens")
+}
+
+model Business {
+  id                        String         @id @default(uuid()) @db.Uuid
+  name                      String
+  legalName                 String?        @map("legal_name")
+  taxId                     String?        @map("tax_id")
+  slug                      String         @unique
+  status                    BusinessStatus @default(active)
+  publishedAt               DateTime? @db.Timestamptz(3)      @map("published_at")
+  description               String?
+  tagline                   String?
+  phone                     String?
+  email                     String?
+  website                   String?
+  logoKey                   String?        @map("logo_key")
+  coverKey                  String?        @map("cover_key")
+  primaryColor              String         @default("#111827") @map("primary_color")
+  themePreset               String         @default("clean") @map("theme_preset")
+  socials                   Json?
+  timezone                  String         @default("Europe/Madrid")
+  currency                  String         @default("EUR") @db.Char(3)
+  locale                    String         @default("es-ES")
+  minLeadMinutes            Int            @default(120) @map("min_lead_minutes")
+  maxAdvanceDays            Int            @default(60) @map("max_advance_days")
+  slotIntervalMinutes       Int            @default(15) @map("slot_interval_minutes")
+  cancellationCutoffMinutes Int            @default(1440) @map("cancellation_cutoff_minutes")
+  reminderHoursBefore       Int            @default(24) @map("reminder_hours_before")
+  createdAt                 DateTime @db.Timestamptz(3)       @default(now()) @map("created_at")
+  updatedAt                 DateTime @db.Timestamptz(3)       @updatedAt @map("updated_at")
+  deletedAt                 DateTime? @db.Timestamptz(3)      @map("deleted_at")
+
+  locations             Location[]
+  memberships           Membership[]
+  professionals         Professional[]
+  professionalLocations  ProfessionalLocation[]
+  services              Service[]
+  serviceLocations      ServiceLocation[]
+  resourceTypes         ResourceType[]
+  resources             Resource[]
+  serviceRequirements   ServiceResourceRequirement[]
+  clients               Client[]
+  appointments          Appointment[]
+  resourceBlocks        ResourceBlock[]
+  resourceReservations  ResourceReservation[]
+  subscriptions         Subscription[]
+
+  @@index([status, publishedAt])
+  @@index([deletedAt])
+  @@map("businesses")
+}
+
+model Location {
+  id           String   @id @default(uuid()) @db.Uuid
+  businessId   String   @map("business_id") @db.Uuid
+  name         String
+  slug         String
+  timezone     String?
+  addressLine1 String   @map("address_line1")
+  addressLine2 String?  @map("address_line2")
+  city         String
+  province     String?
+  postalCode   String   @map("postal_code")
+  countryCode  String   @default("ES") @db.Char(2) @map("country_code")
+  phone        String?
+  email        String?
+  latitude     Decimal? @db.Decimal(9, 6)
+  longitude    Decimal? @db.Decimal(9, 6)
+  isDefault    Boolean  @default(false) @map("is_default")
+  active       Boolean  @default(true)
+  createdAt    DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt    DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business            Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professionals       ProfessionalLocation[]
+  services            ServiceLocation[]
+  serviceRequirements ServiceResourceRequirement[]
+  resources           Resource[]
+  resourceBlocks      ResourceBlock[]
+  resourceReservations ResourceReservation[]
+  appointments        Appointment[]
+
+  @@unique([businessId, slug])
+  @@unique([businessId, id])
+  @@index([businessId, active])
+  @@map("locations")
+}
+
+model Membership {
+  id             String           @id @default(uuid()) @db.Uuid
+  businessId     String           @map("business_id") @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  role           MembershipRole
+  status         MembershipStatus @default(active)
+  professionalId String?          @map("professional_id") @db.Uuid
+  permissions    Json?
+  createdAt      DateTime @db.Timestamptz(3)         @default(now()) @map("created_at")
+  updatedAt      DateTime @db.Timestamptz(3)         @updatedAt @map("updated_at")
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professional Professional? @relation(fields: [professionalId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, userId])
+  @@unique([businessId, professionalId])
+  @@index([userId, status])
+  @@map("memberships")
+}
+
+model Professional {
+  id          String   @id @default(uuid()) @db.Uuid
+  businessId  String   @map("business_id") @db.Uuid
+  displayName String   @map("display_name")
+  title       String?
+  bio         String?
+  photoKey    String?  @map("photo_key")
+  color       String   @default("#111827")
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt   DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business     Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  locations    ProfessionalLocation[]
+  memberships  Membership[]
+  appointments Appointment[]
+
+  @@unique([businessId, id])
+  @@index([businessId, active, sortOrder])
+  @@map("professionals")
+}
+
+model ProfessionalLocation {
+  id             String   @id @default(uuid()) @db.Uuid
+  businessId     String   @map("business_id") @db.Uuid
+  professionalId String   @map("professional_id") @db.Uuid
+  locationId     String   @map("location_id") @db.Uuid
+  isPrimary      Boolean  @default(false) @map("is_primary")
+  active         Boolean  @default(true)
+  createdAt      DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, professionalId, locationId])
+  @@index([businessId, locationId, professionalId])
+  @@map("professional_locations")
+}
+
+model Service {
+  id                 String   @id @default(uuid()) @db.Uuid
+  businessId         String   @map("business_id") @db.Uuid
+  name               String
+  description        String?
+  durationMinutes    Int      @map("duration_minutes")
+  bufferAfterMinutes Int      @default(0) @map("buffer_after_minutes")
+  priceCents         Int      @map("price_cents")
+  currency           String   @default("EUR") @db.Char(3)
+  imageKey           String?  @map("image_key")
+  color              String?
+  active             Boolean  @default(true)
+  onlineBookable     Boolean  @default(true) @map("online_bookable")
+  sortOrder          Int      @default(0) @map("sort_order")
+  createdAt          DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt          DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business     Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  variants     ServiceVariant[]
+  locations    ServiceLocation[]
+  requirements ServiceResourceRequirement[]
+  appointments Appointment[]
+
+  @@unique([businessId, id])
+  @@index([businessId, active, sortOrder])
+  @@map("services")
+}
+
+model ServiceVariant {
+  id                 String   @id @default(uuid()) @db.Uuid
+  businessId         String   @map("business_id") @db.Uuid
+  serviceId          String   @map("service_id") @db.Uuid
+  name               String
+  durationMinutes    Int      @map("duration_minutes")
+  bufferAfterMinutes Int      @default(0) @map("buffer_after_minutes")
+  priceCents         Int      @map("price_cents")
+  active             Boolean  @default(true)
+  sortOrder          Int      @default(0) @map("sort_order")
+  createdAt          DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt          DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@unique([businessId, serviceId, name])
+  @@unique([businessId, serviceId, id])
+  @@map("service_variants")
+}
+
+model ServiceLocation {
+  businessId      String   @map("business_id") @db.Uuid
+  serviceId       String   @map("service_id") @db.Uuid
+  locationId      String   @map("location_id") @db.Uuid
+  active          Boolean  @default(true)
+  priceCents      Int?     @map("price_cents")
+  durationMinutes Int?     @map("duration_minutes")
+  createdAt       DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@id([businessId, serviceId, locationId])
+  @@index([businessId, locationId, serviceId])
+  @@map("service_locations")
+}
+
+model ResourceType {
+  id        String   @id @default(uuid()) @db.Uuid
+  businessId String  @map("business_id") @db.Uuid
+  key       String
+  name      String
+  description String?
+  icon      String?
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business     Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  resources    Resource[]
+  requirements ServiceResourceRequirement[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, key])
+  @@index([businessId, active, sortOrder])
+  @@map("resource_types")
+}
+
+model Resource {
+  id             String   @id @default(uuid()) @db.Uuid
+  businessId     String   @map("business_id") @db.Uuid
+  locationId     String   @map("location_id") @db.Uuid
+  resourceTypeId String   @map("resource_type_id") @db.Uuid
+  name           String
+  code           String
+  description    String?
+  color          String?
+  active         Boolean  @default(true)
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt      DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business     Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location     Location                    @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  resourceType ResourceType                @relation(fields: [resourceTypeId], references: [id], onDelete: Restrict)
+  requirements ServiceResourceRequirement[]
+  blocks       ResourceBlock[]
+  reservations ResourceReservation[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, locationId, code])
+  @@index([businessId, locationId, resourceTypeId, active])
+  @@map("resources")
+}
+
+model ServiceResourceRequirement {
+  id             String   @id @default(uuid()) @db.Uuid
+  businessId     String   @map("business_id") @db.Uuid
+  serviceId      String   @map("service_id") @db.Uuid
+  locationId     String?  @map("location_id") @db.Uuid
+  resourceTypeId String   @map("resource_type_id") @db.Uuid
+  resourceId     String?  @map("resource_id") @db.Uuid
+  quantity       Int      @default(1)
+  required       Boolean  @default(true)
+  createdAt      DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  location     Location?     @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  resourceType ResourceType  @relation(fields: [resourceTypeId], references: [id], onDelete: Restrict)
+  resource     Resource?     @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@unique([businessId, serviceId, locationId, resourceTypeId, resourceId])
+  @@index([businessId, serviceId])
+  @@map("service_resource_requirements")
+}
+
+model ResourceBlock {
+  id         String   @id @default(uuid()) @db.Uuid
+  businessId String   @map("business_id") @db.Uuid
+  locationId String   @map("location_id") @db.Uuid
+  resourceId String   @map("resource_id") @db.Uuid
+  startsAt   DateTime @db.Timestamptz(3) @map("starts_at")
+  endsAt     DateTime @db.Timestamptz(3) @map("ends_at")
+  reason     String?
+  createdAt  DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business     Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location     Location              @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  resource     Resource              @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  reservations ResourceReservation[]
+
+  @@unique([businessId, id])
+  @@index([businessId, resourceId, startsAt])
+  @@map("resource_blocks")
+}
+
+model ResourceReservation {
+  id            String    @id @default(uuid()) @db.Uuid
+  businessId    String    @map("business_id") @db.Uuid
+  locationId    String    @map("location_id") @db.Uuid
+  resourceId    String    @map("resource_id") @db.Uuid
+  appointmentId String?   @map("appointment_id") @db.Uuid
+  blockId       String?   @map("block_id") @db.Uuid
+  startsAt      DateTime @db.Timestamptz(3)  @map("starts_at")
+  endsAt        DateTime @db.Timestamptz(3)  @map("ends_at")
+  releasedAt    DateTime? @db.Timestamptz(3) @map("released_at")
+  createdAt     DateTime @db.Timestamptz(3)  @default(now()) @map("created_at")
+
+  business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location    Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  resource    Resource      @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  appointment Appointment?  @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  block       ResourceBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, resourceId, startsAt])
+  @@index([appointmentId])
+  @@index([blockId])
+  @@index([releasedAt])
+  @@map("resource_reservations")
+}
+
+model Client {
+  id               String    @id @default(uuid()) @db.Uuid
+  businessId       String    @map("business_id") @db.Uuid
+  firstName        String    @map("first_name")
+  lastName         String?   @map("last_name")
+  phoneRaw         String?   @map("phone_raw")
+  phoneE164        String?   @map("phone_e164")
+  email            String?
+  emailNormalized  String?   @map("email_normalized")
+  birthDate        DateTime? @db.Date @map("birth_date")
+  notes            String?
+  marketingConsent Boolean   @default(false) @map("marketing_consent")
+  privacyAcceptedAt DateTime? @db.Timestamptz(3) @map("privacy_accepted_at")
+  lastVisitAt      DateTime? @db.Timestamptz(3) @map("last_visit_at")
+  createdAt        DateTime @db.Timestamptz(3)  @default(now()) @map("created_at")
+  updatedAt        DateTime @db.Timestamptz(3)  @updatedAt @map("updated_at")
+  anonymizedAt     DateTime? @db.Timestamptz(3) @map("anonymized_at")
+  deletedAt        DateTime? @db.Timestamptz(3) @map("deleted_at")
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, phoneE164])
+  @@unique([businessId, emailNormalized])
+  @@index([businessId, lastName, firstName])
+  @@index([businessId, lastVisitAt])
+  @@map("clients")
+}
+
+model Appointment {
+  id                String            @id @default(uuid()) @db.Uuid
+  businessId        String            @map("business_id") @db.Uuid
+  locationId        String            @map("location_id") @db.Uuid
+  professionalId    String            @map("professional_id") @db.Uuid
+  serviceId         String            @map("service_id") @db.Uuid
+  serviceVariantId  String?           @map("service_variant_id") @db.Uuid
+  clientId          String            @map("client_id") @db.Uuid
+  startsAt          DateTime @db.Timestamptz(3)          @map("starts_at")
+  serviceEndsAt     DateTime @db.Timestamptz(3)          @map("service_ends_at")
+  blockedUntil      DateTime @db.Timestamptz(3)          @map("blocked_until")
+  status            AppointmentStatus @default(confirmed)
+  source            AppointmentSource @default(admin)
+  priceCents        Int               @map("price_cents")
+  currency          String            @default("EUR") @db.Char(3)
+  paymentStatus     PaymentStatus     @default(unpaid) @map("payment_status")
+  paidAmountCents   Int               @default(0) @map("paid_amount_cents")
+  paymentMethod     String?           @map("payment_method")
+  clientNotes       String?           @map("client_notes")
+  internalNotes     String?           @map("internal_notes")
+  cancellationReason String?          @map("cancellation_reason")
+  cancelledBy       String?           @map("cancelled_by") @db.Uuid
+  cancelledAt       DateTime? @db.Timestamptz(3)         @map("cancelled_at")
+  completedAt       DateTime? @db.Timestamptz(3)         @map("completed_at")
+  createdAt         DateTime @db.Timestamptz(3)          @default(now()) @map("created_at")
+  updatedAt         DateTime @db.Timestamptz(3)          @updatedAt @map("updated_at")
+
+  business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location    Location      @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  service     Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  variant     ServiceVariant? @relation(fields: [serviceVariantId], references: [id], onDelete: SetNull)
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  resourceReservations ResourceReservation[]
+
+  @@unique([businessId, id])
+  @@index([businessId, startsAt])
+  @@index([businessId, professionalId, startsAt])
+  @@index([businessId, clientId, startsAt])
+  @@index([businessId, status, startsAt])
+  @@map("appointments")
+}
+
+model Plan {
+  id               String       @id @default(uuid()) @db.Uuid
+  code             String       @unique
+  name             String
+  description      String?
+  priceCents       Int          @map("price_cents")
+  currency         String       @default("EUR") @db.Char(3)
+  interval         PlanInterval @default(month)
+  trialDays        Int          @default(14) @map("trial_days")
+  maxProfessionals Int?         @map("max_professionals")
+  maxLocations     Int          @default(1) @map("max_locations")
+  monthlyEmailQuota Int         @default(1000) @map("monthly_email_quota")
+  features         Json
+  active           Boolean      @default(true)
+  sortOrder        Int          @default(0) @map("sort_order")
+  createdAt        DateTime @db.Timestamptz(3)     @default(now()) @map("created_at")
+  updatedAt        DateTime @db.Timestamptz(3)     @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                     String             @id @default(uuid()) @db.Uuid
+  businessId             String             @unique @map("business_id") @db.Uuid
+  planId                 String             @map("plan_id") @db.Uuid
+  status                 SubscriptionStatus @default(trialing)
+  trialEndsAt            DateTime? @db.Timestamptz(3)          @map("trial_ends_at")
+  currentPeriodStart     DateTime? @db.Timestamptz(3)          @map("current_period_start")
+  currentPeriodEnd       DateTime? @db.Timestamptz(3)          @map("current_period_end")
+  provider               String             @default("manual")
+  providerCustomerId     String?            @map("provider_customer_id")
+  providerSubscriptionId String?            @map("provider_subscription_id")
+  createdAt              DateTime @db.Timestamptz(3)           @default(now()) @map("created_at")
+  updatedAt              DateTime @db.Timestamptz(3)           @updatedAt @map("updated_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan     Plan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([status, trialEndsAt])
+  @@map("subscriptions")
+}

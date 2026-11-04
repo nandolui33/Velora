@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: velora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: velora
+      POSTGRES_USER: velora_owner
+      POSTGRES_PASSWORD: velora_owner_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - velora_postgres:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velora_owner -d velora"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: velora-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  velora_postgres:

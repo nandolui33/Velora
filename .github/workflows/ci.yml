@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: velora
+          POSTGRES_USER: velora_owner
+          POSTGRES_PASSWORD: velora_owner_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U velora_owner -d velora"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://velora_app:velora_app_dev@localhost:5432/velora?schema=public
+      DIRECT_URL: postgresql://velora_owner:velora_owner_dev@localhost:5432/velora?schema=public
+      AUTH_SECRET: ci-only-velora-secret-32-bytes-minimum
+      AUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+      GOOGLE_CLIENT_ID: ci-google-client-id.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      EMAIL_SERVER: smtp://localhost:1025
+      EMAIL_FROM: Velora <no-reply@velora.test>
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create application role
+        env:
+          PGPASSWORD: velora_owner_dev
+        run: psql -h localhost -U velora_owner -d velora -f docker/postgres/init.sql
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgresql://velora_owner:velora_owner_dev@localhost:5432/velora?schema=public
+          DIRECT_URL: postgresql://velora_owner:velora_owner_dev@localhost:5432/velora?schema=public
+        run: npm run db:deploy
+
+      - name: Seed
+        env:
+          DIRECT_URL: postgresql://velora_owner:velora_owner_dev@localhost:5432/velora?schema=public
+        run: npm run db:seed
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        env:
+          DATABASE_URL: postgresql://velora_app:velora_app_dev@localhost:5432/velora?schema=public
+          DIRECT_URL: postgresql://velora_owner:velora_owner_dev@localhost:5432/velora?schema=public
+        run: npm test
+
+      - name: Build
+        run: npm run build

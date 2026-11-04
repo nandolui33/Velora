@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --velora-bg: #f7f7f5;
+  --velora-ink: #18181b;
+  --velora-muted: #71717a;
+  --velora-line: #e4e4e7;
+  --velora-accent: #6d28d9;
+  --velora-accent-soft: #ede9fe;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--velora-bg);
+}
+
+body {
+  margin: 0;
+  background: var(--velora-bg);
+  color: var(--velora-ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--velora-accent-soft);
+}
