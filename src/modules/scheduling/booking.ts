@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 import { recordAudit } from "@/lib/audit";
+import { normalizeEmail, normalizePhone } from "@/lib/contact";
 import { withTenant } from "@/lib/tenant";
 import { generateOpaqueToken, hashOpaqueToken } from "@/lib/tokens";
 import type { AvailabilitySlot } from "./availability";
@@ -102,38 +103,7 @@ function makeBookingReference() {
   return value;
 }
 
-export function normalizeEmail(value?: string | null) {
-  const trimmed = value?.trim().toLowerCase() ?? "";
-
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-/** Normaliza a E.164; devuelve null si no es un teléfono plausible. */
-export function normalizePhone(value?: string | null) {
-  const raw = value?.trim() ?? "";
-
-  if (raw.length === 0) {
-    return null;
-  }
-
-  const digits = raw.replace(/[^\d+]/g, "");
-
-  if (digits.startsWith("+")) {
-    return digits.length >= 9 ? digits : null;
-  }
-
-  const plain = digits.replace(/\D/g, "");
-
-  if (plain.length === 9) {
-    return `+34${plain}`;
-  }
-
-  if (plain.startsWith("34") && plain.length === 11) {
-    return `+${plain}`;
-  }
-
-  return null;
-}
+export { normalizeEmail, normalizePhone } from "@/lib/contact";
 
 function requestFingerprint(input: CreateBookingInput) {
   return JSON.stringify({
@@ -309,6 +279,18 @@ async function resolveClient(
       phoneRaw: client.phone?.trim() || null,
       phoneE164,
       privacyAcceptedAt: new Date(),
+    },
+  });
+
+  // El consentimiento de privacidad queda registrado con la reserva.
+  await tx.consentRecord.create({
+    data: {
+      businessId,
+      clientId: created.id,
+      type: "privacy",
+      policyVersion: process.env.PRIVACY_POLICY_VERSION ?? "1.0",
+      granted: true,
+      source: "online_booking",
     },
   });
 

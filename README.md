@@ -2,7 +2,7 @@
 
 **SaaS multiempresa de gestión de citas y reservas para negocios de belleza y bienestar.**
 
-> **Estado del proyecto:** **Fase 3 implementada**. Sobre la base de las fases 0, 1 y 2 ya existen plantillas sectoriales, catálogo, equipo, recursos, página pública, agenda diaria y semanal, motor de disponibilidad, reserva online paso a paso, cancelación por enlace y notificaciones por email con outbox transaccional. La Fase 4 (clientes, estadísticas, planes y RGPD) es el siguiente paso.
+> **Estado del proyecto:** **Fase 4 implementada**. Sobre la base de las fases 0 a 3 ya existen plantillas, catálogo, equipo, recursos, página pública, agenda y reservas online, y además fichas de clientes con búsqueda e historial, fusión y anonimización, exportación CSV/JSON, consentimientos, métricas del periodo y límites de plan con overrides. La Fase 5 (hardening, despliegue y piloto) es el siguiente paso.
 >
 > **Revisión 1.1:** incorpora el feedback sobre recursos físicos, plantillas sectoriales, autenticación estándar con Auth.js, concurrencia de recursos y relación empresa-sede-profesional-servicio-recurso.
 
@@ -235,13 +235,19 @@ Servicios locales:
 Comandos útiles:
 
 ```bash
-npm test            # RLS, concurrencia, disponibilidad, reservas, invitaciones, catálogo
+npm test            # RLS, concurrencia, disponibilidad, reservas, clientes y planes
 npm run typecheck
 npm run lint
 npm run build
 npm run db:studio
 npm run worker -- --once   # una pasada de la outbox (sin bucle)
 ```
+
+Rutas útiles para probar a mano:
+
+- Panel: `http://localhost:3001/app` (agenda, clientes, equipo, recursos, ajustes)
+- Reserva pública: `http://localhost:3001/p/alcazar-peluqueros/reservar`
+- Exportación de clientes: `/app/clientes/export?format=csv` y `?format=json`
 
 > En la Fase 2 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
 
@@ -313,13 +319,13 @@ Estas referencias se han usado para estudiar funcionalidades y experiencia de us
 
 ## 11. Próximo paso
 
-La **Fase 2** está completada:
+La **Fase 4** está completada:
 
-- 7 plantillas sectoriales versionadas y aplicación idempotente.
-- Categorías, servicios y variantes.
-- Profesionales, servicios asignados, horario semanal y ausencias.
-- Tipos de recurso, recursos y requisitos por servicio.
-- Página pública por slug con servicios, equipo, horario y JSON-LD básico; vista previa del borrador para el owner.
-- Pruebas de catálogo, lectura pública, RLS y concurrencia.
+- Motor de disponibilidad con DST, márgenes y requisitos de recursos, y API pública.
+- Agenda diaria y semanal, alta/movimiento/cancelación y bloqueos.
+- Reserva online sin cuenta, confirmación y cancelación por token, y outbox de emails.
+- Clientes con búsqueda, ficha, historial, fusión manual, exportación y anonimización.
+- Consentimientos, métricas del periodo y límites de plan con overrides.
+- Pruebas de disponibilidad, reservas, concurrencia, clientes, exportación, métricas y planes.
 
-El siguiente paso es la **Fase 3: agenda, disponibilidad y reservas**. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.
+El siguiente paso es la **Fase 5: hardening, despliegue y piloto** (suite E2E, retención programada, editor de overrides en plataforma, observabilidad y despliegue en VPS). Las decisiones D1–D11 siguen siendo la referencia de alcance.

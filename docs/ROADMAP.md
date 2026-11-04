@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** plan de ejecución para aprobación  
 **Versión:** 1.1  
-**Estado:** Fases 0, 1 y 2 implementadas; Fase 3 pendiente  
+**Estado:** Fases 0, 1, 2, 3 y 4 implementadas; Fase 5 pendiente  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 ---
@@ -122,7 +122,7 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 **Objetivo:** un superadministrador puede crear una empresa y un propietario puede entrar y configurar lo básico.
 
-> **Estado:** completada. Incluye invitaciones con token, RBAC, plataforma de empresas/planes, suspensión, configuración de negocio/sede/horario, publicación y auditoría. Los límites de plan y el bloqueo de la web pública se completarán cuando existan esos módulos.
+> **Estado:** completada. Incluye invitaciones con token, RBAC, plataforma de empresas/planes, suspensión, configuración de negocio/sede/horario, publicación y auditoría. Los límites de plan se aplican desde la Fase 4 y el bloqueo de la web pública desde la Fase 2.
 
 **Entregables:**
 
@@ -142,10 +142,10 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 - [x] Se crea una empresa y el owner recibe la invitación.
 - [x] El owner entra con Google o enlace mágico y acepta la invitación.
-- [ ] Un profesional invitado ve solo su ámbito. El guard de ajustes ya lo bloquea; el filtrado fino de agenda llega con la Fase 3.
+- [x] Un profesional invitado ve solo su ámbito. El guard de ajustes lo bloquea; el filtrado fino de agenda se apoya en el profesional de la membresía.
 - [x] Un usuario de A no puede abrir recursos de B.
 - [ ] Suspender bloquea las mutaciones del panel; la web pública aún no existe.
-- [ ] Los límites de plan se validan en servidor. Se aplicarán al crear profesionales/sedes en la Fase 2.
+- [x] Los límites de plan se validan en servidor al crear o reactivar profesionales.
 - [x] Todo cambio sensible queda auditado.
 
 **No incluye:** servicios, agenda, reservas.
@@ -234,9 +234,11 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 ---
 
-### Fase 4 — Clientes, estadísticas, planes y RGPD (2 semanas)
+### Fase 4 — Clientes, estadísticas, planes y RGPD (2 semanas) ✅
 
 **Objetivo:** el producto pasa de "reservas" a "gestión del negocio".
+
+> **Estado:** completada, salvo el editor visual de overrides de plan y la retención automática programada, que se abordan en Fase 5. Incluye listado y ficha de clientes con historial, deduplicación, fusión manual, exportación CSV/JSON con RLS, anonimización que conserva métricas, consentimientos (incluida la reserva online), métricas del periodo y límites de plan aplicados con overrides. Ver [PHASE-4.md](PHASE-4.md).
 
 **Entregables:**
 
@@ -256,14 +258,14 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 **Criterios de salida:**
 
-- [ ] El owner encuentra un cliente y ve su historial.
-- [ ] No se duplican clientes por teléfono/email.
-- [ ] La exportación solo incluye la empresa actual.
-- [ ] La anonimización conserva métricas agregadas.
-- [ ] El dashboard muestra las métricas del periodo.
-- [ ] Un plan de 1 profesional bloquea el segundo.
-- [ ] El onboarding guía hasta publicar.
-- [ ] Los consentimientos quedan registrados.
+- [x] El owner encuentra un cliente y ve su historial.
+- [x] No se duplican clientes por teléfono/email.
+- [x] La exportación solo incluye la empresa actual.
+- [x] La anonimización conserva métricas agregadas.
+- [x] El dashboard muestra las métricas del periodo.
+- [x] Un plan de 1 profesional bloquea el segundo.
+- [x] El onboarding guía hasta publicar.
+- [x] Los consentimientos quedan registrados.
 
 ---
 
@@ -716,4 +718,4 @@ Cada puerta puede decidir: continuar, corregir alcance o parar. No se acumulan f
 3. Aprobar o corregir el alcance.
 4. Iniciar la Fase 0 solo tras la aprobación.
 
-**No se ha implementado código de producto.**
+**Las fases 0 a 4 están implementadas; la fase 5 (hardening y piloto) es el siguiente paso.**

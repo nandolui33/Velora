@@ -31,6 +31,8 @@ const errorMessages: Record<string, string> = {
   horario_guardar: "No se pudo guardar el horario.",
   ausencia: "Revisa las fechas de la ausencia.",
   ausencia_guardar: "No se pudo registrar la ausencia.",
+  limite_plan:
+    "Tu plan no permite otro profesional activo. Desactiva uno o amplía el plan.",
 };
 
 export default async function TeamPage({ searchParams }: PageProps) {

@@ -7,7 +7,7 @@
 **Motor:** PostgreSQL 16  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y relaciones multisede.
 
-> **Alcance implementado en Fase 2:** identidad/Auth.js, empresas, sedes, membresías, invitaciones, horario comercial, profesionales y sus sedes, categorías/servicios/variantes, asignaciones profesional-servicio, horarios y ausencias profesionales, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes, suscripciones, auditoría y lectura pública. Las imágenes, comunicaciones y outbox se incorporan en fases posteriores.
+> **Alcance implementado (fases 0–4):** identidad/Auth.js, empresas, sedes, membresías, invitaciones, horario comercial, profesionales y sus sedes, categorías/servicios/variantes, asignaciones profesional-servicio, horarios y ausencias profesionales, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes, suscripciones, auditoría, lectura pública, outbox de notificaciones, idempotencia, consentimientos y overrides de plan. Las imágenes quedan para la fase de medios.
 
 ---
 

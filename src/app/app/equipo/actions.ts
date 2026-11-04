@@ -6,6 +6,7 @@ import { z } from "zod";
 import { recordAudit } from "@/lib/audit";
 import { requireOwner } from "@/lib/guards";
 import { withTenant } from "@/lib/tenant";
+import { assertCanAddProfessional, PlanLimitError } from "@/modules/plans/limits";
 
 const professionalSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
@@ -62,6 +63,8 @@ export async function createProfessionalAction(formData: FormData) {
         role: "owner",
       },
       async (tx) => {
+        await assertCanAddProfessional(tx, ctx.business.id);
+
         const professional = await tx.professional.create({
           data: {
             businessId: ctx.business.id,
@@ -98,7 +101,10 @@ export async function createProfessionalAction(formData: FormData) {
         });
       },
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof PlanLimitError) {
+      errorRedirect("limite_plan");
+    }
     errorRedirect("profesional_guardar");
   }
 
@@ -365,6 +371,10 @@ export async function toggleProfessionalAction(formData: FormData) {
       role: "owner",
     },
     async (tx) => {
+      if (parsed.data.active === "true") {
+        await assertCanAddProfessional(tx, ctx.business.id);
+      }
+
       await tx.professional.updateMany({
         where: {
           id: parsed.data.professionalId,

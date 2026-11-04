@@ -13,12 +13,22 @@ const errors: Record<string, string> = {
   google: "No se pudo iniciar sesión con Google. Inténtalo de nuevo.",
   email: "Introduce un email válido.",
   email_send: "No se pudo enviar el enlace. Revisa el proveedor de email.",
+  Verification:
+    "El enlace ha caducado o ya se ha usado. Los enlaces son de un solo uso: pide uno nuevo.",
+  AccessDenied: "Esta cuenta no tiene acceso a ningún negocio activo.",
+  Configuration: "La configuración de acceso no es correcta. Contacta con soporte.",
+  OAuthAccountNotLinked:
+    "Ese email ya está registrado con otro método de acceso. Entra con el enlace mágico.",
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const error = params.error ? errors[params.error] : null;
-  const checkEmail = params.checkEmail === "1";
+  const error = params.error
+    ? (errors[params.error] ?? "No se pudo completar el acceso. Inténtalo de nuevo.")
+    : null;
+  // Auth.js añade sus propios parámetros a la URL de `verifyRequest`
+  // (`/login?checkEmail=1?provider=…`), así que comprobamos el prefijo.
+  const checkEmail = params.checkEmail?.startsWith("1") ?? false;
   const callbackUrl =
     params.callbackUrl?.startsWith("/") && !params.callbackUrl.startsWith("//")
       ? params.callbackUrl

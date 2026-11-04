@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentContext } from "@/lib/current-context";
 import { withTenant } from "@/lib/tenant";
+import { getEffectivePlan } from "@/modules/plans/limits";
+import { getDashboardStats } from "@/modules/stats/summary";
 
 const cards = [
   { key: "professionals", label: "Profesionales" },
@@ -18,6 +20,11 @@ export default async function AppDashboardPage() {
   }
 
   if (!ctx.membership || !ctx.business) {
+    if (ctx.session.user.isSuperadmin) {
+      // El superadministrador no pertenece a ningún negocio: su panel es /platform.
+      redirect("/platform");
+    }
+
     return (
       <div className="mx-auto max-w-xl rounded-3xl border border-amber-200 bg-amber-50 p-6">
         <h1 className="text-lg font-semibold text-amber-950">Sin acceso</h1>
@@ -43,6 +50,8 @@ export default async function AppDashboardPage() {
     );
   }
 
+  const businessTimezone = ctx.business.timezone;
+
   const data = await withTenant(
     {
       businessId: ctx.membership.businessId,
@@ -58,6 +67,8 @@ export default async function AppDashboardPage() {
         location,
         hours,
         subscription,
+        stats,
+        plan,
       ] = await Promise.all([
         tx.professional.count(),
         tx.service.count(),
@@ -73,6 +84,11 @@ export default async function AppDashboardPage() {
           where: { businessId: ctx.membership.businessId },
           include: { plan: true },
         }),
+        getDashboardStats(tx, {
+          businessId: ctx.membership.businessId,
+          timezone: businessTimezone,
+        }),
+        getEffectivePlan(tx, ctx.membership.businessId),
       ]);
 
       return {
@@ -80,6 +96,8 @@ export default async function AppDashboardPage() {
         location,
         hours,
         subscription,
+        stats,
+        plan,
       };
     },
   );
@@ -130,8 +148,8 @@ export default async function AppDashboardPage() {
               {ctx.business.name}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-              Fase 2: catálogo, equipo, recursos y página pública. La agenda y
-              las reservas llegan en la Fase 3.
+              Agenda, reservas y página pública en marcha. Revisa las citas del
+              día, configura el catálogo y comparte tu página de reservas.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -183,6 +201,78 @@ export default async function AppDashboardPage() {
         ))}
       </section>
 
+      <section className="rounded-2xl border border-zinc-200 bg-white p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-zinc-950">
+            Últimos {data.stats.periodDays} días
+          </h2>
+          <span className="text-xs text-zinc-500">
+            {data.plan.planName ? `Plan ${data.plan.planName}` : "Sin plan"} ·{" "}
+            {data.plan.maxProfessionals === null
+              ? "profesionales ilimitados"
+              : `máx. ${data.plan.maxProfessionals} profesionales`}
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Citas hoy", value: String(data.stats.todayCount) },
+            { label: "Esta semana", value: String(data.stats.weekCount) },
+            { label: "Próximas", value: String(data.stats.upcomingCount) },
+            { label: "Clientes nuevos", value: String(data.stats.newClients) },
+          ].map((item) => (
+            <article key={item.label} className="rounded-xl border border-zinc-100 px-3 py-2.5">
+              <p className="text-xs text-zinc-500">{item.label}</p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
+                {item.value}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <article className="rounded-xl bg-zinc-50 px-3 py-2.5">
+            <p className="text-xs text-zinc-500">Ingreso estimado</p>
+            <p className="mt-1 text-lg font-semibold text-zinc-950">
+              {new Intl.NumberFormat("es-ES", {
+                style: "currency",
+                currency: ctx.business.currency,
+              }).format(data.stats.estimatedCents / 100)}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Citas completadas · {data.stats.completedCount}
+            </p>
+          </article>
+          <article className="rounded-xl bg-zinc-50 px-3 py-2.5">
+            <p className="text-xs text-zinc-500">Cobrado</p>
+            <p className="mt-1 text-lg font-semibold text-zinc-950">
+              {new Intl.NumberFormat("es-ES", {
+                style: "currency",
+                currency: ctx.business.currency,
+              }).format(data.stats.collectedCents / 100)}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Canceladas: {data.stats.cancelledCount} · No presentados:{" "}
+              {data.stats.noShowCount}
+            </p>
+          </article>
+          <article className="rounded-xl bg-zinc-50 px-3 py-2.5">
+            <p className="text-xs text-zinc-500">Servicios top</p>
+            <ul className="mt-1 space-y-0.5 text-xs text-zinc-700">
+              {data.stats.topServices.length === 0 ? (
+                <li className="text-zinc-500">Sin datos aún.</li>
+              ) : null}
+              {data.stats.topServices.map((service) => (
+                <li key={service.name} className="flex justify-between gap-2">
+                  <span className="truncate">{service.name}</span>
+                  <span className="font-medium">{service.count}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
       <section className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
         <div className="rounded-2xl border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between gap-3">
@@ -225,8 +315,8 @@ export default async function AppDashboardPage() {
         <div className="rounded-2xl border border-zinc-200 bg-white p-5">
           <h2 className="text-sm font-semibold text-zinc-950">Siguiente</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Aplica una plantilla, completa el catálogo y asigna servicios al
-            equipo. La Fase 3 construirá la agenda y la reserva online.
+            Revisa la agenda del día, confirma que los servicios tienen recursos
+            asignados y comparte tu página de reservas con los clientes.
           </p>
           <div className="mt-4 space-y-2 text-sm text-zinc-600">
             <p>
@@ -246,33 +336,47 @@ export default async function AppDashboardPage() {
       </section>
 
       <section id="agenda" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article className="rounded-2xl border border-zinc-200 bg-white p-5">
+        <Link
+          href="/app/agenda"
+          className="rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-violet-300 hover:shadow-sm"
+        >
           <h2 className="text-sm font-semibold text-zinc-950">Agenda</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            El motor de disponibilidad y la agenda visual se construyen en la
-            Fase 3, sobre estas tablas y constraints.
+            Citas del día y de la semana, alta manual, movimiento y
+            cancelación.
           </p>
-        </article>
-        <article
-          id="recursos"
-          className="rounded-2xl border border-zinc-200 bg-white p-5"
+          <span className="mt-3 inline-block text-xs font-semibold text-violet-700">
+            Abrir agenda →
+          </span>
+        </Link>
+        <Link
+          href="/app/recursos"
+          className="rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-violet-300 hover:shadow-sm"
         >
           <h2 className="text-sm font-semibold text-zinc-950">Recursos</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Cada recurso tiene su propia exclusion constraint. Una cita y un
+            Cada recurso tiene su propia exclusion constraint: una cita y un
             bloqueo compiten por la misma cabina.
           </p>
-        </article>
-        <article
-          id="servicios"
-          className="rounded-2xl border border-zinc-200 bg-white p-5"
+          <span className="mt-3 inline-block text-xs font-semibold text-violet-700">
+            Ver recursos →
+          </span>
+        </Link>
+        <Link
+          href={`/p/${ctx.business.slug}/reservar`}
+          target="_blank"
+          className="rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-violet-300 hover:shadow-sm"
         >
-          <h2 className="text-sm font-semibold text-zinc-950">Servicios</h2>
+          <h2 className="text-sm font-semibold text-zinc-950">Reserva online</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Servicios y variantes ya existen en el esquema; la plantilla
-            sectorial se incorpora en la Fase 2.
+            {ctx.business.publishedAt
+              ? "Tu página de reservas ya está activa y sin comisiones."
+              : "Publica el negocio para activar la reserva online."}
           </p>
-        </article>
+          <span className="mt-3 inline-block text-xs font-semibold text-violet-700">
+            Ver página de reservas →
+          </span>
+        </Link>
       </section>
     </div>
   );

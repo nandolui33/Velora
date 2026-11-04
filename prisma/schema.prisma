@@ -61,6 +61,12 @@ enum PaymentStatus {
   waived
 }
 
+enum ConsentType {
+  privacy
+  marketing
+  health
+}
+
 enum PlanInterval {
   month
   year
@@ -171,6 +177,7 @@ model Business {
   primaryColor              String         @default("#111827") @map("primary_color")
   themePreset               String         @default("clean") @map("theme_preset")
   socials                   Json?
+  planOverrides             Json?          @map("plan_overrides")
   timezone                  String         @default("Europe/Madrid")
   currency                  String         @default("EUR") @db.Char(3)
   locale                    String         @default("es-ES")
@@ -206,6 +213,7 @@ model Business {
   auditLogs             AuditLog[]
   notificationOutbox    NotificationOutbox[]
   idempotencyKeys       IdempotencyKey[]
+  consentRecords        ConsentRecord[]
 
   @@index([status, publishedAt])
   @@index([deletedAt])
@@ -597,6 +605,7 @@ model Client {
 
   business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   appointments Appointment[]
+  consents     ConsentRecord[]
 
   @@unique([businessId, id])
   @@index([businessId, lastName, firstName])
@@ -829,4 +838,24 @@ model EmailSuppression {
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@map("email_suppressions")
+}
+
+model ConsentRecord {
+  id            String      @id @default(uuid()) @db.Uuid
+  businessId    String      @map("business_id") @db.Uuid
+  clientId      String      @map("client_id") @db.Uuid
+  type          ConsentType
+  policyVersion String      @map("policy_version")
+  granted       Boolean
+  source        String
+  ipHash        String?     @map("ip_hash")
+  userAgent     String?     @map("user_agent")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  revokedAt     DateTime?   @map("revoked_at") @db.Timestamptz(3)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, clientId, type, createdAt(sort: Desc)])
+  @@map("consent_records")
 }
