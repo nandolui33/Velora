@@ -9,6 +9,10 @@ const providers: Provider[] = [
   Google({
     clientId: process.env.GOOGLE_CLIENT_ID ?? "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    // En local permitimos enlazar una cuenta existente con el mismo email
+    // verificado por Google. En producción se sustituirá por un flujo de
+    // vinculación explícito o por invitaciones verificadas.
+    allowDangerousEmailAccountLinking: process.env.NODE_ENV !== "production",
   }),
   Nodemailer({
     server: process.env.EMAIL_SERVER ?? "",
