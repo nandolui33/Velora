@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** plan de ejecución para aprobación  
 **Versión:** 1.1  
-**Estado:** Fase 0 implementada; Fase 1 pendiente  
+**Estado:** Fase 0 y Fase 1 implementadas; Fase 2 pendiente  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 ---
@@ -118,9 +118,11 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 ---
 
-### Fase 1 — Auth, tenancy y plataforma (2 semanas)
+### Fase 1 — Auth, tenancy y plataforma (2 semanas) ✅
 
 **Objetivo:** un superadministrador puede crear una empresa y un propietario puede entrar y configurar lo básico.
+
+> **Estado:** completada. Incluye invitaciones con token, RBAC, plataforma de empresas/planes, suspensión, configuración de negocio/sede/horario, publicación y auditoría. Los límites de plan y el bloqueo de la web pública se completarán cuando existan esos módulos.
 
 **Entregables:**
 
@@ -138,13 +140,13 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 **Criterios de salida:**
 
-- [ ] Se crea una empresa y el owner recibe la invitación.
-- [ ] El owner entra con Google o enlace mágico y acepta la invitación.
-- [ ] Un profesional invitado ve solo su ámbito.
-- [ ] Un usuario de A no puede abrir recursos de B.
-- [ ] Suspender bloquea la web pública y las mutaciones.
-- [ ] Los límites de plan se validan en servidor.
-- [ ] Todo cambio sensible queda auditado.
+- [x] Se crea una empresa y el owner recibe la invitación.
+- [x] El owner entra con Google o enlace mágico y acepta la invitación.
+- [ ] Un profesional invitado ve solo su ámbito. El guard de ajustes ya lo bloquea; el filtrado fino de agenda llega con la Fase 3.
+- [x] Un usuario de A no puede abrir recursos de B.
+- [ ] Suspender bloquea las mutaciones del panel; la web pública aún no existe.
+- [ ] Los límites de plan se validan en servidor. Se aplicarán al crear profesionales/sedes en la Fase 2.
+- [x] Todo cambio sensible queda auditado.
 
 **No incluye:** servicios, agenda, reservas.
 

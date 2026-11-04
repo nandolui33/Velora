@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** propuesta de arquitectura para aprobación  
 **Versión:** 1.1  
-**Estado:** Fase 0 implementada; diseño de fases posteriores  
+**Estado:** Fases 0 y 1 implementadas; diseño de fases posteriores  
 **Cambios v1.1:** recursos físicos, plantillas sectoriales, Auth.js, concurrencia de recursos y relaciones multisede.
 
 ---
@@ -361,6 +361,8 @@ La autenticación se delega en **Auth.js v5 con Prisma Adapter**, no en un módu
 - El invitado entra con Google o enlace mágico; después acepta la invitación.
 - El email autenticado debe coincidir con el de la invitación.
 - Si no hay invitación ni membership activa, el acceso al panel se deniega con un mensaje claro.
+- Implementado: `get_invitation_by_token` resuelve la invitación sin abrir la tabla; la aceptación crea/actualiza la membership y registra auditoría en una transacción con RLS.
+- Implementado: `requireSuperadmin`, `requireOwner` y `requireUser` separan plataforma, configuración y sesión; el panel de plataforma usa `withPlatform`.
 
 **Superadministrador:**
 

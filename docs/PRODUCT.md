@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** propuesta funcional para aprobación  
 **Versión:** 1.1  
-**Estado:** diseño; Fase 0 implementada  
+**Estado:** diseño; Fases 0 y 1 implementadas  
 **Mercado inicial:** España, español, EUR  
 **Cambios v1.1:** recursos físicos, plantillas sectoriales, Auth.js, concurrencia de recursos y relaciones multisede.
 

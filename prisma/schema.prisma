@@ -82,9 +82,11 @@ model User {
   updatedAt         DateTime @db.Timestamptz(3)   @updatedAt @map("updated_at")
   deletedAt         DateTime? @db.Timestamptz(3)  @map("deleted_at")
 
-  accounts    Account[]
-  sessions    Session[]
-  memberships Membership[]
+  accounts        Account[]
+  sessions        Session[]
+  memberships     Membership[]
+  invitationsSent Invitation[] @relation("InvitationInvitedBy")
+  auditLogs       AuditLog[]
 
   @@map("users")
 }
@@ -182,6 +184,9 @@ model Business {
   resourceBlocks        ResourceBlock[]
   resourceReservations  ResourceReservation[]
   subscriptions         Subscription[]
+  invitations           Invitation[]
+  businessHours         BusinessHours[]
+  auditLogs             AuditLog[]
 
   @@index([status, publishedAt])
   @@index([deletedAt])
@@ -217,6 +222,8 @@ model Location {
   resourceBlocks      ResourceBlock[]
   resourceReservations ResourceReservation[]
   appointments        Appointment[]
+  invitations         Invitation[]
+  businessHours       BusinessHours[]
 
   @@unique([businessId, slug])
   @@unique([businessId, id])
@@ -262,6 +269,7 @@ model Professional {
   locations    ProfessionalLocation[]
   memberships  Membership[]
   appointments Appointment[]
+  invitations  Invitation[]
 
   @@unique([businessId, id])
   @@index([businessId, active, sortOrder])
@@ -584,4 +592,64 @@ model Subscription {
 
   @@index([status, trialEndsAt])
   @@map("subscriptions")
+}
+
+model Invitation {
+  id              String           @id @default(uuid()) @db.Uuid
+  businessId      String           @map("business_id") @db.Uuid
+  emailNormalized String           @map("email_normalized")
+  role            MembershipRole
+  professionalId  String?          @map("professional_id") @db.Uuid
+  locationId      String?          @map("location_id") @db.Uuid
+  tokenHash       String           @unique @map("token_hash")
+  invitedBy       String           @map("invited_by") @db.Uuid
+  expiresAt       DateTime         @map("expires_at") @db.Timestamptz(3)
+  acceptedAt      DateTime?        @map("accepted_at") @db.Timestamptz(3)
+  revokedAt       DateTime?        @map("revoked_at") @db.Timestamptz(3)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional? @relation(fields: [professionalId], references: [id], onDelete: SetNull)
+  location     Location?     @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  invitedByUser User         @relation("InvitationInvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@index([businessId, emailNormalized])
+  @@index([expiresAt])
+  @@map("invitations")
+}
+
+model BusinessHours {
+  id         String   @id @default(uuid()) @db.Uuid
+  businessId String   @map("business_id") @db.Uuid
+  locationId String   @map("location_id") @db.Uuid
+  weekday    Int
+  opensAt    String   @map("opens_at")
+  closesAt   String   @map("closes_at")
+  closed     Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, locationId, weekday])
+  @@map("business_hours")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  businessId  String?  @map("business_id") @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  actorType   String   @map("actor_type")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  business  Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  actorUser User?     @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("audit_logs")
 }

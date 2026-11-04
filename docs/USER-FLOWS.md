@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** flujos funcionales para aprobación  
 **Versión:** 1.1  
-**Estado:** diseño; Fase 0 implementada  
+**Estado:** diseño; Fases 0 y 1 implementadas  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 ---

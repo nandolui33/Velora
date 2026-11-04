@@ -1,4 +1,4 @@
-﻿-- Restaura las claves compuestas de tenant que Prisma no modela.
+-- Restaura las claves compuestas de tenant que Prisma no modela.
 -- Ejecutar con el rol owner después de una migración que las elimine.
 
 ALTER TABLE "professional_locations"
@@ -80,4 +80,8 @@ ALTER TABLE "appointments"
 ALTER TABLE "appointments"
   ADD CONSTRAINT "appointments_client_tenant_fk"
   FOREIGN KEY ("business_id", "client_id") REFERENCES "clients"("business_id", "id") ON DELETE RESTRICT;
+
+ALTER TABLE "business_hours"
+  ADD CONSTRAINT "business_hours_location_tenant_fk"
+  FOREIGN KEY ("business_id", "location_id") REFERENCES "locations"("business_id", "id") ON DELETE CASCADE;
 

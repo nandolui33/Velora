@@ -2,7 +2,7 @@
 
 **Estado:** completada  
 **Fecha:** 2026-11-04  
-**Siguiente fase:** Fase 1 — Auth/tenancy/plataforma
+**Siguiente fase:** Fase 1 — Auth/tenancy/plataforma (completada; ver [PHASE-1.md](PHASE-1.md))
 
 ---
 

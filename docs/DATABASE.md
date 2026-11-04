@@ -3,11 +3,11 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** modelo de datos propuesto  
 **Versión:** 1.1  
-**Estado:** Fase 0 implementada; esquema base aplicado  
+**Estado:** Fases 0 y 1 implementadas; esquema base + invitaciones/auditoría/horario aplicados  
 **Motor:** PostgreSQL 16  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y relaciones multisede.
 
-> **Alcance implementado en Fase 0:** identidad/Auth.js, empresas, sedes, membresías, profesionales y sus sedes, catálogo básico, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes y suscripciones. Las tablas de plantillas, auditoría, comunicaciones y outbox se incorporan en fases posteriores.
+> **Alcance implementado en Fase 1:** identidad/Auth.js, empresas, sedes, membresías, invitaciones, horario comercial, profesionales y sus sedes, catálogo básico, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes, suscripciones y auditoría. Las tablas de plantillas, comunicaciones y outbox se incorporan en fases posteriores.
 
 ---
 
@@ -222,8 +222,8 @@ PK: `(identifier, token)`. Índice: `expires`.
 | `revoked_at` | `timestamptz null` | |
 | `created_at` | `timestamptz` | |
 
-Índices: `unique(business_id, email_normalized) where accepted_at is null and revoked_at is null`.  
-FK compuesta: `(business_id, location_id)` → `locations(business_id, id)`.
+Implementado: índice no único `(business_id, email_normalized)`, unique de `token_hash` e índice de `expires_at`. La aplicación revoca invitaciones pendientes antes de reenviar.  
+FK simples a `businesses`, `professionals`, `locations` y `users`; la resolución pública usa `get_invitation_by_token`.
 
 ---
 
@@ -311,13 +311,13 @@ Unique: `(business_id, sector_key)`, `(business_id) where is_primary`.
 | `id` | `uuid` PK | |
 | `business_id` | `uuid` | |
 | `location_id` | `uuid` | |
-| `weekday` | `smallint` | ISO: 1 lunes … 7 domingo. |
-| `opens_at` | `time` | |
-| `closes_at` | `time` | |
+| `weekday` | `integer` | ISO: 1 lunes … 7 domingo. |
+| `opens_at` | `text` | `HH:MM`; validado en servidor. |
+| `closes_at` | `text` | `HH:MM`; validado en servidor. |
+| `closed` | `boolean` | Día cerrado. |
 | `created_at` | `timestamptz` | |
 
-Checks: `weekday between 1 and 7`; `opens_at < closes_at`.  
-Índices: `index(business_id, location_id, weekday)`.
+Implementado: check `weekday between 1 and 7`; unique `(business_id, location_id, weekday)`; FK compuesta `(business_id, location_id)` → `locations(business_id, id)`. La UI de Fase 1 guarda un intervalo por día y valida `opens_at < closes_at` en servidor.
 
 ---
 
@@ -948,15 +948,12 @@ Unique: `(business_id, feature_key)`.
 | `actor_type` | `audit_actor` | `user`, `superadmin`, `system`, `client`. |
 | `action` | `text` | `appointment.created`, `client.anonymized`, etc. |
 | `entity_type` | `text` | |
-| `entity_id` | `uuid null` | |
-| `metadata` | `jsonb` | Sin PII innecesaria. |
-| `ip_hash` | `text null` | |
-| `user_agent` | `text null` | |
-| `request_id` | `text null` | |
+| `entity_id` | `text null` | |
+| `metadata` | `jsonb null` | Sin PII innecesaria. |
 | `created_at` | `timestamptz` | |
 
-Índices: `index(business_id, created_at desc)`, `index(actor_user_id, created_at desc)`, `index(entity_type, entity_id)`.  
-Append-only: trigger que bloquea `UPDATE` y `DELETE`. La retención se ejecuta con un rol de mantenimiento autorizado, nunca desde la aplicación.
+Implementado: índices `(business_id, created_at)` y `(actor_user_id, created_at)`.  
+Append-only: RLS no define políticas de `UPDATE` ni `DELETE`; la aplicación solo inserta y lee. Las columnas `ip_hash`, `user_agent` y `request_id` quedan para una fase posterior.
 
 #### `media_assets`
 

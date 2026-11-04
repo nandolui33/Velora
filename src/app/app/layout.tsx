@@ -8,6 +8,7 @@ const navigation = [
   { href: "/app#agenda", label: "Agenda" },
   { href: "/app#recursos", label: "Recursos" },
   { href: "/app#servicios", label: "Servicios" },
+  { href: "/app/ajustes", label: "Ajustes" },
 ];
 
 export default async function AppLayout({
@@ -29,20 +30,28 @@ export default async function AppLayout({
             </div>
             <div>
               <p className="text-sm font-semibold tracking-tight">Velora</p>
-              <p className="text-xs text-zinc-500">Fase 0</p>
+              <p className="text-xs text-zinc-500">Fase 1</p>
             </div>
           </Link>
 
           <nav className="mt-10 space-y-1">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="block rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
+            {session.user.isSuperadmin ? (
+              <Link
+                href="/platform"
+                className="block rounded-xl px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50"
+              >
+                Plataforma
+              </Link>
+            ) : null}
           </nav>
 
           <div className="mt-auto rounded-2xl bg-zinc-50 p-3 text-xs leading-5 text-zinc-500">

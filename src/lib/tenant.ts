@@ -46,3 +46,20 @@ export async function withUser<T>(
     { timeout: 10_000 },
   );
 }
+
+/**
+ * Contexto de plataforma. Solo lo usan acciones de superadministrador y
+ * tareas internas; RLS lo reconoce con `app.platform = 'on'`.
+ */
+export async function withPlatform<T>(
+  fn: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$queryRaw`SELECT set_config('app.platform', 'on', true)`;
+      return fn(tx);
+    },
+    { timeout: 15_000 },
+  );
+}
+

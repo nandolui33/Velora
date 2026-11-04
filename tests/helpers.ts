@@ -44,6 +44,18 @@ export async function withUserApp<T>(
   );
 }
 
+export async function withPlatformApp<T>(
+  fn: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  return app.$transaction(
+    async (tx) => {
+      await tx.$queryRaw`SELECT set_config('app.platform', 'on', true)`;
+      return fn(tx);
+    },
+    { timeout: 20_000 },
+  );
+}
+
 export type Fixture = {
   businessId: string;
   otherBusinessId: string;

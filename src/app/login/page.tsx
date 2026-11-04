@@ -2,7 +2,11 @@ import Link from "next/link";
 import { signInWithEmail, signInWithGoogle } from "./actions";
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string; checkEmail?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    checkEmail?: string;
+    callbackUrl?: string;
+  }>;
 };
 
 const errors: Record<string, string> = {
@@ -15,6 +19,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const error = params.error ? errors[params.error] : null;
   const checkEmail = params.checkEmail === "1";
+  const callbackUrl =
+    params.callbackUrl?.startsWith("/") && !params.callbackUrl.startsWith("//")
+      ? params.callbackUrl
+      : "/app";
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-10">
@@ -55,6 +63,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         ) : null}
 
         <form action={signInWithGoogle} className="mt-6">
+          <input type="hidden" name="redirectTo" value={callbackUrl} />
           <button
             type="submit"
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-50"
@@ -70,6 +79,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         <form action={signInWithEmail} className="space-y-3">
+          <input type="hidden" name="redirectTo" value={callbackUrl} />
           <label
             htmlFor="email"
             className="block text-sm font-medium text-zinc-800"

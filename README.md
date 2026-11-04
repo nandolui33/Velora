@@ -2,7 +2,7 @@
 
 **SaaS multiempresa de gestión de citas y reservas para negocios de belleza y bienestar.**
 
-> **Estado del proyecto:** **Fase 0 implementada**. Existe un esqueleto ejecutable con Next.js App Router, TypeScript, PostgreSQL, Prisma, RLS, Auth.js, seed de dos empresas y pruebas de concurrencia de profesional y recurso. La Fase 1 (auth/tenancy/plataforma) es el siguiente paso.
+> **Estado del proyecto:** **Fase 1 implementada**. Sobre la base de la Fase 0 (Next.js App Router, TypeScript, PostgreSQL, Prisma, RLS, Auth.js, seed y pruebas de concurrencia) ya existen invitaciones con token, RBAC, panel de plataforma, alta manual de empresas, planes, suspensión/reactivación y configuración básica de negocio, sede y horario. La Fase 2 (servicios, equipo y recursos) es el siguiente paso.
 >
 > **Revisión 1.1:** incorpora el feedback sobre recursos físicos, plantillas sectoriales, autenticación estándar con Auth.js, concurrencia de recursos y relación empresa-sede-profesional-servicio-recurso.
 
@@ -126,6 +126,7 @@ El detalle está en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Fases, backlog priorizado, estimación, costes de infraestructura y criterios de lanzamiento. |
 | [docs/SECURITY.md](docs/SECURITY.md) | Modelo de amenazas, controles, RGPD, retención, backups, respuesta a incidentes y checklist. |
 | [docs/PHASE-0.md](docs/PHASE-0.md) | Estado real de la Fase 0: estructura, arranque, pruebas y limitaciones conocidas. |
+| [docs/PHASE-1.md](docs/PHASE-1.md) | Invitaciones, RBAC, plataforma, configuración de negocio, auditoría y pruebas de la Fase 1. |
 
 Lectura recomendada para aprobar la propuesta:
 
@@ -231,21 +232,23 @@ Servicios locales:
 Comandos útiles:
 
 ```bash
-npm test            # RLS + concurrencia de profesional y recurso
+npm test            # RLS, concurrencia, invitaciones y auditoría
 npm run typecheck
 npm run lint
 npm run build
 npm run db:studio
 ```
 
-> En la Fase 0 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
+> En la Fase 1 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
 
 ### Credenciales locales
 
-- Owner: `owner@example.test`
+- Owner de demo: `owner@example.test`
 - Superadmin: `superadmin@example.test`
 - No hay contraseñas: se entra con Google o enlace mágico. En local, el enlace mágico se lee en Mailpit.
-- Las credenciales de Google de `.env` son marcadores de desarrollo; para probar Google hay que configurar un cliente OAuth propio.
+- En la base local actual, la cuenta de Google del desarrollador es owner de Alcázar; el seed no contiene datos personales.
+- Las credenciales reales de Google viven en `.env.local` (ignorado). El `.env.example` solo contiene marcadores.
+- Para Google, la callback local es `http://localhost:3001/api/auth/callback/google`.
 
 ### Base de datos y RLS
 
@@ -306,14 +309,13 @@ Estas referencias se han usado para estudiar funcionalidades y experiencia de us
 
 ## 11. Próximo paso
 
-La **Fase 0** está completada:
+La **Fase 1** está completada:
 
-- Repositorio Next.js App Router + TypeScript.
-- Docker Compose con PostgreSQL y Mailpit.
-- Esquema Prisma inicial.
-- RLS, claves compuestas y dos exclusion constraints.
-- Auth.js con Google y enlace mágico.
-- Seed de dos empresas.
-- Pruebas de aislamiento y concurrencia.
+- Invitaciones con token opaco, hash en base de datos y aceptación autenticada.
+- RBAC `owner` / `professional` / `superadmin`.
+- Panel de plataforma: alta de empresas, listado, detalle, plan, prueba, suspensión y reactivación.
+- Configuración de negocio, sede principal, horario semanal y publicación.
+- Auditoría de acciones de plataforma y negocio.
+- Pruebas de RLS, invitaciones, auditoría y concurrencia.
 
-El siguiente paso es la **Fase 1: auth/tenancy/plataforma**, con alta de empresas, invitaciones, roles, suspensión y planes manuales. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.
+El siguiente paso es la **Fase 2: servicios, equipo y recursos**, con plantillas sectoriales. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.
