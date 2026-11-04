@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** plan de ejecución para aprobación  
 **Versión:** 1.1  
-**Estado:** Fases 0, 1, 2, 3 y 4 implementadas; Fase 5 pendiente  
+**Estado:** Fases 0 a 4 implementadas; Fase 5 en curso (hardening y despliegue hechos, piloto pendiente)  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 ---

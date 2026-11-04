@@ -33,7 +33,7 @@ export default async function AppLayout({
             </div>
             <div>
               <p className="text-sm font-semibold tracking-tight">Velora</p>
-              <p className="text-xs text-zinc-500">Fase 4</p>
+              <p className="text-xs text-zinc-500">Fase 5</p>
             </div>
           </Link>
 

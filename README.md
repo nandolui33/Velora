@@ -2,7 +2,7 @@
 
 **SaaS multiempresa de gestión de citas y reservas para negocios de belleza y bienestar.**
 
-> **Estado del proyecto:** **Fase 4 implementada**. Sobre la base de las fases 0 a 3 ya existen plantillas, catálogo, equipo, recursos, página pública, agenda y reservas online, y además fichas de clientes con búsqueda e historial, fusión y anonimización, exportación CSV/JSON, consentimientos, métricas del periodo y límites de plan con overrides. La Fase 5 (hardening, despliegue y piloto) es el siguiente paso.
+> **Estado del proyecto:** **Fase 5 en curso**. Las fases 0 a 4 están completas (plantillas, catálogo, equipo, recursos, página pública, agenda, reservas online, clientes, consentimientos, métricas y planes) y la fase 5 aporta hardening y despliegue: cabeceras de seguridad, rate limiting, retención RGPD, Dockerfile standalone, compose de producción con Caddy/TLS y [runbook](docs/DEPLOY.md). Falta el piloto real con un negocio y la verificación en infraestructura.
 >
 > **Revisión 1.1:** incorpora el feedback sobre recursos físicos, plantillas sectoriales, autenticación estándar con Auth.js, concurrencia de recursos y relación empresa-sede-profesional-servicio-recurso.
 
@@ -249,6 +249,20 @@ Rutas útiles para probar a mano:
 - Reserva pública: `http://localhost:3001/p/alcazar-peluqueros/reservar`
 - Exportación de clientes: `/app/clientes/export?format=csv` y `?format=json`
 
+### Despliegue
+
+Producción usa Docker Compose con Caddy como proxy TLS:
+
+```bash
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d postgres
+docker compose -f docker-compose.prod.yml run --rm app npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml up -d app worker caddy
+```
+
+Variables, backups, prueba de restauración, monitorización y runbook de
+incidentes en [docs/DEPLOY.md](docs/DEPLOY.md).
+
 > En la Fase 2 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
 
 ### Credenciales locales
@@ -328,4 +342,4 @@ La **Fase 4** está completada:
 - Consentimientos, métricas del periodo y límites de plan con overrides.
 - Pruebas de disponibilidad, reservas, concurrencia, clientes, exportación, métricas y planes.
 
-El siguiente paso es la **Fase 5: hardening, despliegue y piloto** (suite E2E, retención programada, editor de overrides en plataforma, observabilidad y despliegue en VPS). Las decisiones D1–D11 siguen siendo la referencia de alcance.
+La **Fase 5** está en curso: hardening (cabeceras, rate limiting, retención RGPD), imagen Docker standalone, compose de producción con Caddy/TLS y runbook de despliegue. Queda la verificación en infraestructura (TLS, backups, monitorización), la auditoría de accesibilidad y el piloto con un negocio. Las decisiones D1–D11 siguen siendo la referencia de alcance.

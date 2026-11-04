@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getPublicBookingTarget } from "@/modules/booking/public";
+import { checkRateLimit, clientKey, rateLimitResponse } from "@/lib/rate-limit";
 import { BookingError, createBooking } from "@/modules/scheduling/booking";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,15 @@ export async function POST(
   context: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await context.params;
+
+  const limit = checkRateLimit(`booking:${clientKey(request)}`, {
+    limit: 10,
+    windowMs: 60_000,
+  });
+
+  if (!limit.ok) {
+    return rateLimitResponse(limit);
+  }
 
   let body: unknown;
   try {

@@ -1,8 +1,12 @@
 node_modules
 .next
 .git
+.github
+coverage
+*.log
 .env
 .env.*
-coverage
-tests
+!.env.example
+README.md
 docs
+tests

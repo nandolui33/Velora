@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getPublicAvailability } from "@/modules/booking/public";
+import { checkRateLimit, clientKey, rateLimitResponse } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,16 @@ export async function GET(
 ) {
   const { slug } = await context.params;
   const url = new URL(request.url);
+
+  const limit = checkRateLimit(`availability:${clientKey(request)}`, {
+    limit: 120,
+    windowMs: 60_000,
+  });
+
+  if (!limit.ok) {
+    return rateLimitResponse(limit);
+  }
+
   const parsed = querySchema.safeParse(Object.fromEntries(url.searchParams));
 
   if (!parsed.success) {
