@@ -2,9 +2,12 @@ node_modules/
 .next/
 out/
 coverage/
+
+# Variables de entorno: nunca subir secretos
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
 *.log
 *.tsbuildinfo
 .DS_Store
