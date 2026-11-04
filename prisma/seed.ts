@@ -447,6 +447,61 @@ async function main() {
     },
   });
 
+  // Horario comercial y horario del equipo: sin ellos la agenda no tiene huecos.
+  for (const [business, location] of [
+    [businessA, locationA],
+    [businessB, locationB],
+  ] as const) {
+    for (let weekday = 1; weekday <= 7; weekday += 1) {
+      await prisma.businessHours.upsert({
+        where: {
+          businessId_locationId_weekday: {
+            businessId: business.id,
+            locationId: location.id,
+            weekday,
+          },
+        },
+        update: {},
+        create: {
+          businessId: business.id,
+          locationId: location.id,
+          weekday,
+          opensAt: "09:00",
+          closesAt: weekday === 7 ? "14:00" : "20:00",
+          closed: weekday === 7,
+        },
+      });
+    }
+  }
+
+  for (const [business, location, professional] of [
+    [businessA, locationA, professionalA],
+    [businessB, locationB, professionalB],
+  ] as const) {
+    for (let weekday = 1; weekday <= 6; weekday += 1) {
+      await prisma.professionalSchedule.upsert({
+        where: {
+          businessId_professionalId_locationId_weekday: {
+            businessId: business.id,
+            professionalId: professional.id,
+            locationId: location.id,
+            weekday,
+          },
+        },
+        update: {},
+        create: {
+          businessId: business.id,
+          professionalId: professional.id,
+          locationId: location.id,
+          weekday,
+          opensAt: "09:00",
+          closesAt: weekday === 6 ? "14:00" : "18:00",
+          active: true,
+        },
+      });
+    }
+  }
+
   console.log("Seed completed:", {
     businesses: [businessA.slug, businessB.slug],
     owner: owner.email,

@@ -18,6 +18,7 @@ export type TenantContext = {
 export async function withTenant<T>(
   ctx: TenantContext,
   fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  options: { timeout?: number } = {},
 ): Promise<T> {
   return prisma.$transaction(
     async (tx) => {
@@ -25,7 +26,7 @@ export async function withTenant<T>(
       await tx.$queryRaw`SELECT set_config('app.user_id', ${ctx.userId ?? ""}, true)`;
       return fn(tx);
     },
-    { timeout: 10_000 },
+    { timeout: options.timeout ?? 10_000 },
   );
 }
 

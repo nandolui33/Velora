@@ -204,6 +204,8 @@ model Business {
   invitations           Invitation[]
   businessHours         BusinessHours[]
   auditLogs             AuditLog[]
+  notificationOutbox    NotificationOutbox[]
+  idempotencyKeys       IdempotencyKey[]
 
   @@index([status, publishedAt])
   @@index([deletedAt])
@@ -597,8 +599,6 @@ model Client {
   appointments Appointment[]
 
   @@unique([businessId, id])
-  @@unique([businessId, phoneE164])
-  @@unique([businessId, emailNormalized])
   @@index([businessId, lastName, firstName])
   @@index([businessId, lastVisitAt])
   @@map("clients")
@@ -611,6 +611,11 @@ model Appointment {
   professionalId    String            @map("professional_id") @db.Uuid
   serviceId         String            @map("service_id") @db.Uuid
   serviceVariantId  String?           @map("service_variant_id") @db.Uuid
+  serviceName       String            @map("service_name")
+  serviceVariantName String?          @map("service_variant_name")
+  professionalName  String            @map("professional_name")
+  durationMinutes   Int               @map("duration_minutes")
+  bufferAfterMinutes Int              @default(0) @map("buffer_after_minutes")
   clientId          String            @map("client_id") @db.Uuid
   startsAt          DateTime @db.Timestamptz(3)          @map("starts_at")
   serviceEndsAt     DateTime @db.Timestamptz(3)          @map("service_ends_at")
@@ -628,6 +633,9 @@ model Appointment {
   cancelledBy       String?           @map("cancelled_by") @db.Uuid
   cancelledAt       DateTime? @db.Timestamptz(3)         @map("cancelled_at")
   completedAt       DateTime? @db.Timestamptz(3)         @map("completed_at")
+  bookingReference  String             @map("booking_reference")
+  publicTokenHash   String             @map("public_token_hash")
+  createdBy         String?            @map("created_by") @db.Uuid
   createdAt         DateTime @db.Timestamptz(3)          @default(now()) @map("created_at")
   updatedAt         DateTime @db.Timestamptz(3)          @updatedAt @map("updated_at")
 
@@ -638,8 +646,11 @@ model Appointment {
   variant     ServiceVariant? @relation(fields: [serviceVariantId], references: [id], onDelete: SetNull)
   client      Client        @relation(fields: [clientId], references: [id], onDelete: Restrict)
   resourceReservations ResourceReservation[]
+  notifications NotificationOutbox[]
 
   @@unique([businessId, id])
+  @@unique([businessId, bookingReference])
+  @@unique([businessId, publicTokenHash])
   @@index([businessId, startsAt])
   @@index([businessId, professionalId, startsAt])
   @@index([businessId, clientId, startsAt])
@@ -749,4 +760,73 @@ model AuditLog {
   @@index([businessId, createdAt])
   @@index([actorUserId, createdAt])
   @@map("audit_logs")
+}
+
+enum NotificationChannel {
+  email
+  sms
+  whatsapp
+}
+
+enum NotificationStatus {
+  pending
+  sending
+  sent
+  failed
+  cancelled
+}
+
+model NotificationOutbox {
+  id                String              @id @default(uuid()) @db.Uuid
+  businessId        String              @map("business_id") @db.Uuid
+  appointmentId     String?             @map("appointment_id") @db.Uuid
+  channel           NotificationChannel @default(email)
+  template          String
+  recipient         String
+  recipientName     String?             @map("recipient_name")
+  subject           String?
+  payload           Json                @default("{}")
+  scheduledAt       DateTime            @default(now()) @map("scheduled_at") @db.Timestamptz(3)
+  status            NotificationStatus  @default(pending)
+  attempts          Int                 @default(0)
+  lastError         String?             @map("last_error")
+  provider          String?
+  providerMessageId String?             @map("provider_message_id")
+  costMicros        Int                 @default(0) @map("cost_micros")
+  dedupeKey         String              @unique @map("dedupe_key")
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentAt            DateTime?           @map("sent_at") @db.Timestamptz(3)
+
+  business    Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([status, scheduledAt])
+  @@index([businessId, createdAt])
+  @@map("notification_outbox")
+}
+
+model IdempotencyKey {
+  businessId     String   @map("business_id") @db.Uuid
+  key            String
+  requestHash    String   @map("request_hash")
+  responseStatus Int      @map("response_status")
+  responseJson   Json     @map("response_json")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@id([businessId, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
+model EmailSuppression {
+  emailNormalized String   @id @map("email_normalized")
+  reason          String
+  source          String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("email_suppressions")
 }

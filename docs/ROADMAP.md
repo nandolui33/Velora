@@ -192,9 +192,11 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 ---
 
-### Fase 3 — Agenda, disponibilidad y reservas (3 semanas)
+### Fase 3 — Agenda, disponibilidad y reservas (3 semanas) ✅
 
 **Objetivo:** el núcleo del producto. Una cita puede crearse desde el panel o desde la web pública, sin solapamientos.
+
+> **Estado:** completada. Incluye motor de disponibilidad puro con DST y requisitos de recursos, API pública de disponibilidad, agenda diaria y semanal con vistas por profesional, alta/movimiento/cancelación de citas, bloqueos de recurso, reserva pública paso a paso, transacción con locks y exclusion constraints, idempotencia, upsert de cliente, confirmación y cancelación por token, y outbox con dispatcher de emails. Ver [PHASE-3.md](PHASE-3.md).
 
 **Entregables:**
 
@@ -217,16 +219,16 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 **Criterios de salida:**
 
-- [ ] Un cliente reserva desde el móvil sin cuenta.
-- [ ] Solo se muestran horas libres.
-- [ ] 20 reservas simultáneas al mismo hueco: 1 éxito, 19 `SLOT_TAKEN`.
-- [ ] 20 reservas simultáneas a la misma cabina: 1 éxito, 19 `RESOURCE_TAKEN`.
-- [ ] El owner ve la cita y sus recursos en la agenda.
-- [ ] El cliente recibe confirmación y puede cancelar.
-- [ ] El negocio recibe aviso.
-- [ ] El recordatorio se programa y no se envía si se cancela.
-- [ ] La agenda funciona en iOS Safari y Android Chrome.
-- [ ] No hay datos de otras empresas en la respuesta pública.
+- [x] Un cliente reserva desde el móvil sin cuenta.
+- [x] Solo se muestran horas libres.
+- [x] 20 reservas simultáneas al mismo hueco: 1 éxito, 19 `SLOT_TAKEN`.
+- [x] 20 reservas simultáneas a la misma cabina: 1 éxito, 19 `RESOURCE_TAKEN`.
+- [x] El owner ve la cita y sus recursos en la agenda.
+- [x] El cliente recibe confirmación y puede cancelar.
+- [x] El negocio recibe aviso.
+- [x] El recordatorio se programa y no se envía si se cancela.
+- [x] La agenda funciona en iOS Safari y Android Chrome.
+- [x] No hay datos de otras empresas en la respuesta pública.
 
 **Riesgo principal:** zonas horarias, buffers y DST. Se cubren con tests antes de construir la UI.
 

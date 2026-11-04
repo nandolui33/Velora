@@ -183,10 +183,20 @@ export default async function PublicBusinessPage({
                 {business.description}
               </p>
             ) : null}
-            <p className="mt-6 text-xs text-zinc-500">
-              Reserva online disponible próximamente. La disponibilidad se
-              incorpora en la siguiente fase.
-            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              {business.services.length > 0 ? (
+                <Link
+                  href={`/p/${business.slug}/reservar`}
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+                  style={{ backgroundColor: business.primaryColor }}
+                >
+                  Reservar cita
+                </Link>
+              ) : null}
+              <p className="text-xs text-zinc-500">
+                Reserva online sin registro. Recibirás la confirmación por email.
+              </p>
+            </div>
           </div>
 
           <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-6">

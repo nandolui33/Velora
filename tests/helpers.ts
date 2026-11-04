@@ -10,6 +10,10 @@ const appUrl = new URL(process.env.DATABASE_URL);
 appUrl.searchParams.set("connection_limit", "30");
 appUrl.searchParams.set("pool_timeout", "30");
 
+// El cliente de aplicación compartido con `src/lib/db` recibe un pool amplio
+// para que las pruebas de concurrencia no agoten las conexiones.
+process.env.DATABASE_URL = appUrl.toString();
+
 export const owner = new PrismaClient({
   datasourceUrl: process.env.DIRECT_URL,
 });

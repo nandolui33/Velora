@@ -5,7 +5,7 @@ import { signOutAction } from "./actions";
 
 const navigation = [
   { href: "/app", label: "Resumen" },
-  { href: "/app#agenda", label: "Agenda" },
+  { href: "/app/agenda", label: "Agenda" },
   { href: "/app/servicios", label: "Servicios" },
   { href: "/app/equipo", label: "Equipo" },
   { href: "/app/recursos", label: "Recursos" },

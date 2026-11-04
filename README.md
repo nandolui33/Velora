@@ -2,7 +2,7 @@
 
 **SaaS multiempresa de gestión de citas y reservas para negocios de belleza y bienestar.**
 
-> **Estado del proyecto:** **Fase 2 implementada**. Sobre la base de las fases 0 y 1 ya existen plantillas sectoriales, categorías, servicios y variantes, equipo con horarios y ausencias, recursos físicos y requisitos, y página pública con servicios, equipo y horario. La Fase 3 (agenda, disponibilidad y reservas) es el siguiente paso.
+> **Estado del proyecto:** **Fase 3 implementada**. Sobre la base de las fases 0, 1 y 2 ya existen plantillas sectoriales, catálogo, equipo, recursos, página pública, agenda diaria y semanal, motor de disponibilidad, reserva online paso a paso, cancelación por enlace y notificaciones por email con outbox transaccional. La Fase 4 (clientes, estadísticas, planes y RGPD) es el siguiente paso.
 >
 > **Revisión 1.1:** incorpora el feedback sobre recursos físicos, plantillas sectoriales, autenticación estándar con Auth.js, concurrencia de recursos y relación empresa-sede-profesional-servicio-recurso.
 
@@ -222,6 +222,7 @@ docker compose up -d postgres mailpit
 npm run db:migrate
 npm run db:seed
 npm run dev
+npm run worker      # en otra terminal: dispatcher de la outbox de emails
 ```
 
 Servicios locales:
@@ -229,15 +230,17 @@ Servicios locales:
 - App: `http://localhost:3001` (Empresites usa el 3000)
 - PostgreSQL: `localhost:5433` (se usa 5433 para no chocar con otros proyectos)
 - Correo de desarrollo: Mailpit en `http://localhost:8025`
+- Reserva pública de ejemplo: `http://localhost:3001/p/alcazar-peluqueros/reservar`
 
 Comandos útiles:
 
 ```bash
-npm test            # RLS, concurrencia, invitaciones, catálogo y página pública
+npm test            # RLS, concurrencia, disponibilidad, reservas, invitaciones, catálogo
 npm run typecheck
 npm run lint
 npm run build
 npm run db:studio
+npm run worker -- --once   # una pasada de la outbox (sin bucle)
 ```
 
 > En la Fase 2 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.

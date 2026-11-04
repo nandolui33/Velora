@@ -1,4 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
 import { owner } from "./helpers";
 import {
   app,
@@ -20,6 +21,12 @@ function appointmentData(
     professionalId,
     serviceId: fixture.serviceId,
     clientId: fixture.clientId,
+    serviceName: "Corte",
+    professionalName: "Pro",
+    durationMinutes: 30,
+    bufferAfterMinutes: 5,
+    bookingReference: randomUUID().slice(0, 6).toUpperCase(),
+    publicTokenHash: randomUUID().replaceAll("-", ""),
     startsAt,
     serviceEndsAt: new Date(startsAt.getTime() + 30 * 60 * 1000),
     blockedUntil: new Date(startsAt.getTime() + 35 * 60 * 1000),
