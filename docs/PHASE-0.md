@@ -13,6 +13,7 @@
 - Prisma ORM con migración inicial aplicada.
 - RLS activo y forzado en las tablas de negocio.
 - Claves compuestas para evitar referencias entre empresas.
+- `prisma/sql/tenant-constraints.sql` para restaurar las claves compuestas si una migración generada por Prisma intenta eliminarlas.
 - Dos exclusion constraints:
   - `appointments_no_overlap` para el profesional.
   - `resource_reservations_no_overlap` para cada recurso físico.

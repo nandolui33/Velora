@@ -256,6 +256,8 @@ npm run db:studio
   - `resource_reservations_no_overlap` para cada recurso físico.
 - Las pruebas crean empresas aisladas y comprueban que sin contexto no se devuelven filas.
 
+> **Importante:** Prisma no modela las claves compuestas de tenant. `prisma migrate dev` puede generar una migración que las elimine. Usa `npm run db:migrate` (`prisma migrate deploy`) para aplicar migraciones y revisa siempre las migraciones generadas. Si se eliminan, restáuralas con [prisma/sql/tenant-constraints.sql](prisma/sql/tenant-constraints.sql) usando el rol `velora_owner`.
+
 ---
 
 ## 8. Principios de trabajo
