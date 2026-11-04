@@ -85,3 +85,27 @@ ALTER TABLE "business_hours"
   ADD CONSTRAINT "business_hours_location_tenant_fk"
   FOREIGN KEY ("business_id", "location_id") REFERENCES "locations"("business_id", "id") ON DELETE CASCADE;
 
+ALTER TABLE "services"
+  ADD CONSTRAINT "services_category_tenant_fk"
+  FOREIGN KEY ("business_id", "category_id") REFERENCES "service_categories"("business_id", "id") ON DELETE RESTRICT;
+
+ALTER TABLE "professional_services"
+  ADD CONSTRAINT "professional_services_professional_tenant_fk"
+  FOREIGN KEY ("business_id", "professional_id") REFERENCES "professionals"("business_id", "id") ON DELETE CASCADE;
+
+ALTER TABLE "professional_services"
+  ADD CONSTRAINT "professional_services_service_tenant_fk"
+  FOREIGN KEY ("business_id", "service_id") REFERENCES "services"("business_id", "id") ON DELETE CASCADE;
+
+ALTER TABLE "professional_schedules"
+  ADD CONSTRAINT "professional_schedules_professional_tenant_fk"
+  FOREIGN KEY ("business_id", "professional_id") REFERENCES "professionals"("business_id", "id") ON DELETE CASCADE;
+
+ALTER TABLE "professional_schedules"
+  ADD CONSTRAINT "professional_schedules_location_tenant_fk"
+  FOREIGN KEY ("business_id", "location_id") REFERENCES "locations"("business_id", "id") ON DELETE CASCADE;
+
+ALTER TABLE "professional_time_off"
+  ADD CONSTRAINT "professional_time_off_professional_tenant_fk"
+  FOREIGN KEY ("business_id", "professional_id") REFERENCES "professionals"("business_id", "id") ON DELETE CASCADE;
+

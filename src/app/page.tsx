@@ -47,7 +47,7 @@ export default function HomePage() {
       <section className="grid gap-10 py-16 sm:py-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
         <div>
           <span className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-violet-700">
-            Fase 0 · Fundaciones
+            Fase 2 · Catálogo y página pública
           </span>
           <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-zinc-950 sm:text-6xl">
             La agenda que también entiende de cabinas y camillas.
@@ -126,7 +126,7 @@ export default function HomePage() {
       </section>
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200 py-6 text-xs text-zinc-500">
-        <span>Velora · Fase 0</span>
+        <span>Velora · Fase 2</span>
         <span>Next.js · TypeScript · PostgreSQL · Prisma</span>
       </footer>
     </main>

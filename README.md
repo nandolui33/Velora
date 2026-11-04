@@ -2,7 +2,7 @@
 
 **SaaS multiempresa de gestión de citas y reservas para negocios de belleza y bienestar.**
 
-> **Estado del proyecto:** **Fase 1 implementada**. Sobre la base de la Fase 0 (Next.js App Router, TypeScript, PostgreSQL, Prisma, RLS, Auth.js, seed y pruebas de concurrencia) ya existen invitaciones con token, RBAC, panel de plataforma, alta manual de empresas, planes, suspensión/reactivación y configuración básica de negocio, sede y horario. La Fase 2 (servicios, equipo y recursos) es el siguiente paso.
+> **Estado del proyecto:** **Fase 2 implementada**. Sobre la base de las fases 0 y 1 ya existen plantillas sectoriales, categorías, servicios y variantes, equipo con horarios y ausencias, recursos físicos y requisitos, y página pública con servicios, equipo y horario. La Fase 3 (agenda, disponibilidad y reservas) es el siguiente paso.
 >
 > **Revisión 1.1:** incorpora el feedback sobre recursos físicos, plantillas sectoriales, autenticación estándar con Auth.js, concurrencia de recursos y relación empresa-sede-profesional-servicio-recurso.
 
@@ -127,6 +127,7 @@ El detalle está en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | [docs/SECURITY.md](docs/SECURITY.md) | Modelo de amenazas, controles, RGPD, retención, backups, respuesta a incidentes y checklist. |
 | [docs/PHASE-0.md](docs/PHASE-0.md) | Estado real de la Fase 0: estructura, arranque, pruebas y limitaciones conocidas. |
 | [docs/PHASE-1.md](docs/PHASE-1.md) | Invitaciones, RBAC, plataforma, configuración de negocio, auditoría y pruebas de la Fase 1. |
+| [docs/PHASE-2.md](docs/PHASE-2.md) | Plantillas, catálogo, equipo, recursos, página pública y pruebas de la Fase 2. |
 
 Lectura recomendada para aprobar la propuesta:
 
@@ -232,14 +233,14 @@ Servicios locales:
 Comandos útiles:
 
 ```bash
-npm test            # RLS, concurrencia, invitaciones y auditoría
+npm test            # RLS, concurrencia, invitaciones, catálogo y página pública
 npm run typecheck
 npm run lint
 npm run build
 npm run db:studio
 ```
 
-> En la Fase 1 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
+> En la Fase 2 no se almacenan imágenes todavía; MinIO/R2 se incorpora en la fase de medios. El correo de desarrollo se envía a Mailpit.
 
 ### Credenciales locales
 
@@ -309,13 +310,13 @@ Estas referencias se han usado para estudiar funcionalidades y experiencia de us
 
 ## 11. Próximo paso
 
-La **Fase 1** está completada:
+La **Fase 2** está completada:
 
-- Invitaciones con token opaco, hash en base de datos y aceptación autenticada.
-- RBAC `owner` / `professional` / `superadmin`.
-- Panel de plataforma: alta de empresas, listado, detalle, plan, prueba, suspensión y reactivación.
-- Configuración de negocio, sede principal, horario semanal y publicación.
-- Auditoría de acciones de plataforma y negocio.
-- Pruebas de RLS, invitaciones, auditoría y concurrencia.
+- 7 plantillas sectoriales versionadas y aplicación idempotente.
+- Categorías, servicios y variantes.
+- Profesionales, servicios asignados, horario semanal y ausencias.
+- Tipos de recurso, recursos y requisitos por servicio.
+- Página pública por slug con servicios, equipo, horario y JSON-LD básico.
+- Pruebas de catálogo, lectura pública, RLS y concurrencia.
 
-El siguiente paso es la **Fase 2: servicios, equipo y recursos**, con plantillas sectoriales. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.
+El siguiente paso es la **Fase 3: agenda, disponibilidad y reservas**. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.

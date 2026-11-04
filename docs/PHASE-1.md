@@ -2,7 +2,7 @@
 
 **Estado:** completada  
 **Fecha:** 2026-11-04  
-**Siguiente fase:** Fase 2 — servicios, equipo y recursos
+**Siguiente fase:** Fase 2 — servicios, equipo y recursos (completada; ver [PHASE-2.md](PHASE-2.md))
 
 ---
 

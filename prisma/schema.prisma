@@ -19,6 +19,16 @@ enum BusinessStatus {
   disabled
 }
 
+enum BusinessSector {
+  barberia
+  peluqueria
+  manicura
+  spa
+  cejas_pestanas
+  estetica
+  masajes
+}
+
 enum MembershipRole {
   owner
   professional
@@ -147,6 +157,9 @@ model Business {
   taxId                     String?        @map("tax_id")
   slug                      String         @unique
   status                    BusinessStatus @default(active)
+  sector                    BusinessSector?
+  templateVersion           String?        @map("template_version")
+  templateAppliedAt         DateTime? @db.Timestamptz(3) @map("template_applied_at")
   publishedAt               DateTime? @db.Timestamptz(3)      @map("published_at")
   description               String?
   tagline                   String?
@@ -172,10 +185,14 @@ model Business {
 
   locations             Location[]
   memberships           Membership[]
+  serviceCategories     ServiceCategory[]
   professionals         Professional[]
   professionalLocations  ProfessionalLocation[]
   services              Service[]
   serviceLocations      ServiceLocation[]
+  professionalServices  ProfessionalService[]
+  professionalSchedules ProfessionalSchedule[]
+  professionalTimeOff   ProfessionalTimeOff[]
   resourceTypes         ResourceType[]
   resources             Resource[]
   serviceRequirements   ServiceResourceRequirement[]
@@ -224,6 +241,8 @@ model Location {
   appointments        Appointment[]
   invitations         Invitation[]
   businessHours       BusinessHours[]
+  professionalSchedules ProfessionalSchedule[]
+  professionalTimeOff ProfessionalTimeOff[]
 
   @@unique([businessId, slug])
   @@unique([businessId, id])
@@ -270,6 +289,9 @@ model Professional {
   memberships  Membership[]
   appointments Appointment[]
   invitations  Invitation[]
+  serviceLinks ProfessionalService[]
+  schedules    ProfessionalSchedule[]
+  timeOff      ProfessionalTimeOff[]
 
   @@unique([businessId, id])
   @@index([businessId, active, sortOrder])
@@ -294,9 +316,28 @@ model ProfessionalLocation {
   @@map("professional_locations")
 }
 
+model ServiceCategory {
+  id         String   @id @default(uuid()) @db.Uuid
+  businessId String   @map("business_id") @db.Uuid
+  name       String
+  slug       String
+  sortOrder  Int      @default(0) @map("sort_order")
+  active     Boolean  @default(true)
+  createdAt  DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+  updatedAt  DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  services Service[]
+
+  @@unique([businessId, slug])
+  @@unique([businessId, id])
+  @@map("service_categories")
+}
+
 model Service {
   id                 String   @id @default(uuid()) @db.Uuid
   businessId         String   @map("business_id") @db.Uuid
+  categoryId         String?  @map("category_id") @db.Uuid
   name               String
   description        String?
   durationMinutes    Int      @map("duration_minutes")
@@ -312,14 +353,70 @@ model Service {
   updatedAt          DateTime @db.Timestamptz(3) @updatedAt @map("updated_at")
 
   business     Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category     ServiceCategory?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   variants     ServiceVariant[]
   locations    ServiceLocation[]
   requirements ServiceResourceRequirement[]
   appointments Appointment[]
+  professionalLinks ProfessionalService[]
 
   @@unique([businessId, id])
   @@index([businessId, active, sortOrder])
   @@map("services")
+}
+
+model ProfessionalService {
+  businessId     String   @map("business_id") @db.Uuid
+  professionalId String   @map("professional_id") @db.Uuid
+  serviceId      String   @map("service_id") @db.Uuid
+  active         Boolean  @default(true)
+  createdAt      DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([businessId, professionalId, serviceId])
+  @@index([businessId, serviceId, professionalId])
+  @@map("professional_services")
+}
+
+model ProfessionalSchedule {
+  id             String   @id @default(uuid()) @db.Uuid
+  businessId     String   @map("business_id") @db.Uuid
+  professionalId String   @map("professional_id") @db.Uuid
+  locationId     String   @map("location_id") @db.Uuid
+  weekday        Int
+  opensAt        String   @map("opens_at")
+  closesAt       String   @map("closes_at")
+  active         Boolean  @default(true)
+  createdAt      DateTime @db.Timestamptz(3) @default(now()) @map("created_at")
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  location     Location     @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, professionalId, locationId, weekday])
+  @@index([businessId, locationId, weekday])
+  @@map("professional_schedules")
+}
+
+model ProfessionalTimeOff {
+  id             String   @id @default(uuid()) @db.Uuid
+  businessId     String   @map("business_id") @db.Uuid
+  professionalId String   @map("professional_id") @db.Uuid
+  locationId     String?  @map("location_id") @db.Uuid
+  startsAt       DateTime @map("starts_at") @db.Timestamptz(3)
+  endsAt         DateTime @map("ends_at") @db.Timestamptz(3)
+  reason         String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  location     Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, professionalId, startsAt])
+  @@map("professional_time_off")
 }
 
 model ServiceVariant {

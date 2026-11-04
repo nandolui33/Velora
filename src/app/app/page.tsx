@@ -103,6 +103,18 @@ export default async function AppDashboardPage() {
       label: "Negocio publicado",
       done: Boolean(ctx.business.publishedAt),
     },
+    {
+      label: "Catálogo de servicios",
+      done: data.counts.services > 0,
+    },
+    {
+      label: "Equipo",
+      done: data.counts.professionals > 0,
+    },
+    {
+      label: "Recursos físicos",
+      done: data.counts.resources > 0,
+    },
   ];
   const completed = checklist.filter((item) => item.done).length;
 
@@ -118,15 +130,24 @@ export default async function AppDashboardPage() {
               {ctx.business.name}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-              Fase 1: configuración del negocio, sede, horario y publicación.
-              La agenda y las reservas llegan en la Fase 3.
+              Fase 2: catálogo, equipo, recursos y página pública. La agenda y
+              las reservas llegan en la Fase 3.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700">
               {data.subscription?.plan.name ?? "Sin plan"} ·{" "}
               {data.subscription?.status ?? "sin suscripción"}
             </span>
+            {ctx.business.publishedAt ? (
+              <Link
+                href={`/p/${ctx.business.slug}`}
+                target="_blank"
+                className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+              >
+                Ver página pública
+              </Link>
+            ) : null}
             {ctx.membership.role === "owner" ? (
               <Link
                 href="/app/ajustes"
@@ -195,8 +216,8 @@ export default async function AppDashboardPage() {
         <div className="rounded-2xl border border-zinc-200 bg-white p-5">
           <h2 className="text-sm font-semibold text-zinc-950">Siguiente</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            La Fase 2 añadirá plantillas sectoriales, servicios, equipo y
-            recursos. La Fase 3 construirá la agenda y la reserva pública.
+            Aplica una plantilla, completa el catálogo y asigna servicios al
+            equipo. La Fase 3 construirá la agenda y la reserva online.
           </p>
           <div className="mt-4 space-y-2 text-sm text-zinc-600">
             <p>

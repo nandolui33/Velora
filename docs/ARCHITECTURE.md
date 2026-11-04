@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** propuesta de arquitectura para aprobación  
 **Versión:** 1.1  
-**Estado:** Fases 0 y 1 implementadas; diseño de fases posteriores  
+**Estado:** Fases 0, 1 y 2 implementadas; diseño de fases posteriores  
 **Cambios v1.1:** recursos físicos, plantillas sectoriales, Auth.js, concurrencia de recursos y relaciones multisede.
 
 ---

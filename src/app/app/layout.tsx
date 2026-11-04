@@ -6,8 +6,10 @@ import { signOutAction } from "./actions";
 const navigation = [
   { href: "/app", label: "Resumen" },
   { href: "/app#agenda", label: "Agenda" },
-  { href: "/app#recursos", label: "Recursos" },
-  { href: "/app#servicios", label: "Servicios" },
+  { href: "/app/servicios", label: "Servicios" },
+  { href: "/app/equipo", label: "Equipo" },
+  { href: "/app/recursos", label: "Recursos" },
+  { href: "/app/plantillas", label: "Plantillas" },
   { href: "/app/ajustes", label: "Ajustes" },
 ];
 
@@ -30,7 +32,7 @@ export default async function AppLayout({
             </div>
             <div>
               <p className="text-sm font-semibold tracking-tight">Velora</p>
-              <p className="text-xs text-zinc-500">Fase 1</p>
+              <p className="text-xs text-zinc-500">Fase 2</p>
             </div>
           </Link>
 
@@ -66,7 +68,7 @@ export default async function AppLayout({
                 Panel del negocio
               </p>
               <p className="text-xs text-zinc-500">
-                Agenda, recursos y configuración inicial
+Catálogo, equipo y configuración
               </p>
             </div>
             <form action={signOutAction}>

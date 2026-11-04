@@ -7,7 +7,7 @@
 **Motor:** PostgreSQL 16  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y relaciones multisede.
 
-> **Alcance implementado en Fase 1:** identidad/Auth.js, empresas, sedes, membresías, invitaciones, horario comercial, profesionales y sus sedes, catálogo básico, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes, suscripciones y auditoría. Las tablas de plantillas, comunicaciones y outbox se incorporan en fases posteriores.
+> **Alcance implementado en Fase 2:** identidad/Auth.js, empresas, sedes, membresías, invitaciones, horario comercial, profesionales y sus sedes, categorías/servicios/variantes, asignaciones profesional-servicio, horarios y ausencias profesionales, recursos, requisitos, bloqueos, reservas de recurso, clientes, citas, planes, suscripciones, auditoría y lectura pública. Las imágenes, comunicaciones y outbox se incorporan en fases posteriores.
 
 ---
 
@@ -401,6 +401,8 @@ Checks: `weekday between 1 and 7`; `starts_at < ends_at`.
 FK compuesta: `(business_id, professional_id)` → `professionals(business_id, id)`;  
 FK compuesta: `(business_id, location_id)` → `locations(business_id, id)`.
 
+> **Implementado en Fase 2:** la tabla real se llama `professional_schedules` y usa `opens_at`/`closes_at` (`text`, `HH:MM`), `active` y `unique(business_id, professional_id, location_id, weekday)`. Las ausencias se guardan en `professional_time_off` (`starts_at`, `ends_at`, `reason`), no en `schedule_exceptions`. La asignación servicio-profesional se llama `professional_services` y tiene PK `(business_id, professional_id, service_id)`.
+
 #### `schedule_exceptions`
 
 Representa vacaciones, festivos, descansos, bloqueos y disponibilidad extra.
@@ -453,6 +455,8 @@ FKs compuestas a services y professionals.
 | `updated_at` | `timestamptz` | |
 
 Índices: `unique(business_id, id)`, `unique(business_id, name)`, `unique(business_id, template_key) where template_key is not null`, `index(business_id, sort_order)`.
+
+> **Implementado en Fase 2:** la tabla real no tiene `description` ni `template_key`; usa `slug` con `unique(business_id, slug)` y la plantilla se identifica por nombre. `services` guarda `category_id` con una FK compuesta adicional de tenant.
 
 #### `services`
 
@@ -1365,6 +1369,8 @@ grant execute on function get_public_business(text) to velora_app;
 ```
 
 La función solo devuelve campos públicos y filtra por estado. La app la usa para resolver el tenant de la web pública.
+
+> **Implementación real en Fase 2:** `get_public_business(p_slug)` devuelve un único `jsonb` (no una tabla) con negocio, sede, horario, servicios/variantes y profesionales; exige `published_at is not null`, `status = 'active'` y `deleted_at is null`. El fragmento anterior describe la intención; la migración `20261104170701_phase2` contiene la versión aplicada.
 
 ### 8.5 Tests de aislamiento
 

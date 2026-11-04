@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** plan de ejecución para aprobación  
 **Versión:** 1.1  
-**Estado:** Fase 0 y Fase 1 implementadas; Fase 2 pendiente  
+**Estado:** Fases 0, 1 y 2 implementadas; Fase 3 pendiente  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 ---
@@ -152,9 +152,11 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 ---
 
-### Fase 2 — Plantillas, catálogo, equipo y recursos (3 semanas)
+### Fase 2 — Plantillas, catálogo, equipo y recursos (3 semanas) ✅
 
 **Objetivo:** el negocio puede configurar su oferta, su equipo, sus sedes y sus recursos, y existe una página pública en borrador.
+
+> **Estado:** completada. Incluye 7 plantillas idempotentes, catálogo, equipo con horarios y ausencias, recursos y requisitos, y página pública con JSON-LD. La subida de imágenes y la vista previa interna quedan para la fase de medios; la reserva online llega en Fase 3.
 
 **Entregables:**
 
@@ -176,15 +178,15 @@ Las fechas exactas se fijarán al aprobar la propuesta. El diagrama muestra el o
 
 **Criterios de salida:**
 
-- [ ] El owner aplica una plantilla y obtiene servicios y recursos coherentes.
-- [ ] Aplicar la misma plantilla dos veces no duplica.
-- [ ] El owner crea 3 servicios con variantes, 2 profesionales y 4 recursos.
-- [ ] Cada profesional tiene sede, horario y servicios.
-- [ ] Cada servicio que lo exige tiene requisitos de recurso.
-- [ ] La página pública muestra precios, duración y equipo.
-- [ ] La página no recibe reservas si no está publicada.
-- [ ] Las imágenes se sirven desde R2 y están optimizadas.
-- [ ] La disponibilidad aún no se muestra al cliente (Fase 3).
+- [x] El owner aplica una plantilla y obtiene servicios y recursos coherentes.
+- [x] Aplicar la misma plantilla dos veces no duplica.
+- [x] El owner crea servicios con variantes, profesionales y recursos.
+- [x] Cada profesional tiene sede, horario y servicios.
+- [x] Cada servicio que lo exige tiene requisitos de recurso.
+- [x] La página pública muestra precios, duración y equipo.
+- [x] La página no recibe reservas si no está publicada.
+- [ ] Las imágenes se sirven desde R2 y están optimizadas. Pendiente de la fase de medios.
+- [x] La disponibilidad aún no se muestra al cliente (Fase 3).
 
 **Riesgo principal:** la edición de horarios y recursos en móvil. Se prueba en dispositivo real antes de cerrar la fase.
 

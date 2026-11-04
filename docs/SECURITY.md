@@ -3,7 +3,7 @@
 **Producto:** Velora (nombre de trabajo)  
 **Documento:** modelo de seguridad y cumplimiento para aprobación  
 **Versión:** 1.1  
-**Estado:** diseño; Fases 0 y 1 implementadas  
+**Estado:** diseño; Fases 0, 1 y 2 implementadas  
 **Cambios v1.1:** Auth.js, recursos físicos, plantillas sectoriales y multisede.
 
 > Este documento es una propuesta técnica y operativa. No constituye asesoramiento jurídico. La política de privacidad, los términos, el DPA y los periodos de retención deben revisarse con asesoría legal antes del lanzamiento.
@@ -135,7 +135,8 @@ La autenticación se delega en **Auth.js v5 + Prisma Adapter**.
 - La solicitud de enlace mágico devuelve una respuesta genérica para no revelar si el email existe.
 - Implementado en Fase 1: token opaco de 32 bytes, SHA-256 en `invitations.token_hash`, caducidad de 7 días, aceptación autenticada y comparación de email.
 - La lectura pública de la invitación se hace con `get_invitation_by_token` (`SECURITY DEFINER`), que solo devuelve los campos necesarios.
-- Las tablas `invitations`, `business_hours` y `audit_logs` tienen RLS forzado.
+- Las tablas `invitations`, `business_hours`, `audit_logs`, `service_categories`, `professional_services`, `professional_schedules` y `professional_time_off` tienen RLS forzado.
+- La página pública usa `get_public_business(slug)` (`SECURITY DEFINER`), que solo devuelve negocios publicados y campos públicos; no expone datos fiscales, suscripción, membresías ni auditoría.
 - `audit_logs` no tiene políticas de `UPDATE` ni `DELETE`: la aplicación solo inserta y lee.
 - La vinculación automática de Google por email está limitada a desarrollo (`allowDangerousEmailAccountLinking`); en producción se sustituirá por un flujo explícito o invitaciones verificadas.
 
