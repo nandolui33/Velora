@@ -63,7 +63,7 @@ La lectura pública no usa `withTenant`. Se hace mediante `get_public_business(s
 - agrega servicios, variantes, profesionales y horario en un JSON;
 - no expone datos fiscales, suscripción, miembros ni auditoría.
 
-La página incluye JSON-LD `BeautySalon` con dirección y horarios. La reserva online todavía no está conectada; llega en Fase 3.
+La página incluye JSON-LD `BeautySalon` con dirección y horarios. El owner puede previsualizar un borrador con `/p/[slug]?preview=1`; el resto de usuarios recibe 404. La reserva online todavía no está conectada; llega en Fase 3.
 
 ## 4. Migración
 
@@ -92,7 +92,7 @@ También se mantienen RLS, invitaciones, auditoría y concurrencia.
 ## 6. Limitaciones conocidas
 
 - **No hay subida de imágenes**: logo, portada y fotos de servicio quedan para la fase de medios (R2/S3).
-- **No hay vista previa interna** de la página pública; se publica y se abre `/p/[slug]`.
+- La **vista previa** existe en `/p/[slug]?preview=1` para el owner, pero no tiene barra de herramientas ni edición inline.
 - **No hay disponibilidad ni reserva online**: Fase 3.
 - **No hay multi-sede operativa**: se usa la sede principal; el esquema admite más.
 - **No hay CRUD de edición completo**: se crean y activan/desactivan servicios y profesionales; la edición detallada se ampliará.
@@ -107,6 +107,7 @@ También se mantienen RLS, invitaciones, auditoría y concurrencia.
 - [x] Profesionales con servicios, horario y ausencias.
 - [x] Tipos de recurso, recursos y requisitos.
 - [x] Página pública publicada y no indexable en borrador.
+- [x] Vista previa del borrador para el owner.
 - [x] RLS y pruebas de aislamiento.
-- [ ] Imágenes y vista previa: fase de medios.
+- [ ] Imágenes: fase de medios.
 - [ ] Disponibilidad y reserva: Fase 3.

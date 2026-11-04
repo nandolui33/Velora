@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublicBusiness } from "@/lib/public-business";
+import { getCurrentContext } from "@/lib/current-context";
+import {
+  getBusinessPreview,
+  getPublicBusiness,
+} from "@/lib/public-business";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 };
 
 const weekdayNames = [
@@ -49,9 +54,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PublicBusinessPage({ params }: PageProps) {
+export default async function PublicBusinessPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug } = await params;
-  const business = await getPublicBusiness(slug);
+  const { preview } = await searchParams;
+  let business = await getPublicBusiness(slug);
+  let isPreview = false;
+
+  if (!business && preview === "1") {
+    const ctx = await getCurrentContext();
+
+    if (
+      ctx?.membership?.role === "owner" &&
+      ctx.business?.slug === slug &&
+      ctx.business.status === "active"
+    ) {
+      business = await getBusinessPreview(ctx.business.id);
+      isPreview = Boolean(business);
+    }
+  }
 
   if (!business) {
     notFound();
@@ -115,6 +138,15 @@ export default async function PublicBusinessPage({ params }: PageProps) {
           __html: JSON.stringify(jsonLd).replaceAll("<", "\\u003c"),
         }}
       />
+
+      {isPreview ? (
+        <div className="bg-amber-50 px-4 py-2 text-center text-xs font-medium text-amber-800">
+          Vista previa del borrador · solo visible para el propietario ·{" "}
+          <Link href="/app/ajustes" className="underline">
+            volver a ajustes
+          </Link>
+        </div>
+      ) : null}
 
       <header className="border-b border-zinc-100">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">

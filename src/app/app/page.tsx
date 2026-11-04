@@ -139,6 +139,15 @@ export default async function AppDashboardPage() {
               {data.subscription?.plan.name ?? "Sin plan"} ·{" "}
               {data.subscription?.status ?? "sin suscripción"}
             </span>
+            {ctx.membership.role === "owner" ? (
+              <Link
+                href={`/p/${ctx.business.slug}?preview=1`}
+                target="_blank"
+                className="rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+              >
+                Vista previa
+              </Link>
+            ) : null}
             {ctx.business.publishedAt ? (
               <Link
                 href={`/p/${ctx.business.slug}`}

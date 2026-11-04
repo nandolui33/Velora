@@ -316,7 +316,7 @@ La **Fase 2** está completada:
 - Categorías, servicios y variantes.
 - Profesionales, servicios asignados, horario semanal y ausencias.
 - Tipos de recurso, recursos y requisitos por servicio.
-- Página pública por slug con servicios, equipo, horario y JSON-LD básico.
+- Página pública por slug con servicios, equipo, horario y JSON-LD básico; vista previa del borrador para el owner.
 - Pruebas de catálogo, lectura pública, RLS y concurrencia.
 
 El siguiente paso es la **Fase 3: agenda, disponibilidad y reservas**. Las decisiones D1–D11 siguen siendo la referencia de alcance y deben confirmarse antes de ampliar módulos.
